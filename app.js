@@ -97,6 +97,8 @@ const els = {
   predictSearch: document.querySelector("#predictSearch"),
   predictFilter: document.querySelector("#predictFilter"),
   predictionList: document.querySelector("#predictionList"),
+  groupOverviewSearch: document.querySelector("#groupOverviewSearch"),
+  groupOverviewFilter: document.querySelector("#groupOverviewFilter"),
   predictionOverview: document.querySelector("#predictionOverview"),
   awardPredictionForm: document.querySelector("#awardPredictionForm"),
   awardPredictionMatrix: document.querySelector("#awardPredictionMatrix"),
@@ -204,6 +206,8 @@ function bindEvents() {
   els.scheduleSearch.addEventListener("input", renderSchedule);
   els.predictSearch.addEventListener("input", renderPredictions);
   els.predictFilter.addEventListener("change", renderPredictions);
+  els.groupOverviewSearch.addEventListener("input", renderPredictionOverview);
+  els.groupOverviewFilter.addEventListener("change", renderPredictionOverview);
   els.refreshAwardsBtn.addEventListener("click", refreshSharedState);
   els.resultSearch.addEventListener("input", renderResults);
   els.notifyBtn.addEventListener("click", requestNotifications);
@@ -222,6 +226,7 @@ function renderAll() {
   renderDashboard();
   renderSchedule();
   renderPredictions();
+  renderPredictionOverview();
   renderAwardPredictions();
   renderResults();
   renderLeaderboard();
@@ -398,7 +403,6 @@ function renderPredictions() {
   const member = state.currentMember;
   const list = filteredPredictionMatches(member);
   renderList(els.predictionList, list, (match) => matchCard(match, "predict"));
-  renderPredictionOverview(list);
 }
 
 function filteredPredictionMatches(member) {
@@ -411,7 +415,8 @@ function filteredPredictionMatches(member) {
   return list;
 }
 
-function renderPredictionOverview(list) {
+function renderPredictionOverview() {
+  const list = filteredGroupOverviewMatches();
   els.predictionOverview.innerHTML = list.length
     ? `<table class="prediction-overview-table">
         <thead>
@@ -433,6 +438,20 @@ function renderPredictionOverview(list) {
         <tbody>${list.map(predictionOverviewRow).join("")}</tbody>
       </table>`
     : `<p class="empty">Không có trận phù hợp.</p>`;
+}
+
+function filteredGroupOverviewMatches() {
+  const query = norm(els.groupOverviewSearch.value);
+  const filter = els.groupOverviewFilter.value;
+  let list = matches.filter((match) => matchText(match).includes(query));
+  if (filter === "open") list = list.filter(isOpen);
+  if (filter === "scored") list = list.filter((match) => state.results[match.id]);
+  if (filter === "today") {
+    const dayMatches = dailyStatusMatches();
+    const ids = new Set(dayMatches.map((match) => match.id));
+    list = list.filter((match) => ids.has(match.id));
+  }
+  return list;
 }
 
 function predictionOverviewRow(match) {

@@ -202,6 +202,10 @@ main {
   justify-content: flex-start;
 }
 
+.compact-toolbar {
+  margin-bottom: 0;
+}
+
 .toolbar input[type="search"],
 .block-head input[type="search"] {
   width: min(420px, 100%);

@@ -23,6 +23,7 @@
     <nav class="tabs" aria-label="Khu vực chức năng">
       <button class="tab active" data-tab="dashboard" type="button">Hôm nay</button>
       <button class="tab" data-tab="predict" type="button">Dự đoán</button>
+      <button class="tab" data-tab="groupOverview" type="button">Toàn nhóm</button>
       <button class="tab" data-tab="leaderboard" type="button">BXH</button>
       <button class="tab" data-tab="awardPredictions" type="button">Dự đoán giải</button>
       <button class="tab" data-tab="admin" type="button">Quản trị</button>
@@ -148,9 +149,21 @@
           </select>
         </div>
         <div id="predictionList" class="match-list"></div>
+      </section>
+
+      <section id="groupOverview" class="panel">
         <section class="block prediction-overview-block">
           <div class="block-head">
             <h2>Thông tin dự đoán toàn nhóm</h2>
+            <div class="toolbar compact-toolbar">
+              <input id="groupOverviewSearch" type="search" placeholder="Tìm trận, đội, sân" />
+              <select id="groupOverviewFilter">
+                <option value="all">Tất cả trận</option>
+                <option value="open">Còn mở</option>
+                <option value="scored">Đã có kết quả</option>
+                <option value="today">Ngày đang theo dõi</option>
+              </select>
+            </div>
           </div>
           <div id="predictionOverview" class="table-wrap"></div>
         </section>
