@@ -346,13 +346,51 @@ main {
 }
 
 .prediction-overview-table {
-  min-width: 1100px;
+  min-width: 1450px;
+  border: 1px solid #202020;
 }
 
 .prediction-overview-table th,
 .prediction-overview-table td {
+  border: 1px solid #202020;
+  padding: 6px 8px;
+  text-align: center;
   vertical-align: top;
   white-space: normal;
+}
+
+.prediction-overview-table th {
+  background: #ec7b2d;
+  color: #080808;
+  font-weight: 800;
+}
+
+.prediction-overview-table .group-head {
+  font-size: 15px;
+}
+
+.prediction-overview-table td:nth-child(5),
+.prediction-overview-table td:nth-child(7) {
+  min-width: 150px;
+}
+
+.prediction-overview-table .score-cell {
+  background: #b7d7a8;
+  min-width: 70px;
+  font-weight: 800;
+}
+
+.prediction-cell {
+  min-width: 62px;
+}
+
+.prediction-cell.exact {
+  background: #93c47d;
+  font-weight: 800;
+}
+
+.prediction-cell.missing {
+  color: var(--muted);
 }
 
 .award-form {

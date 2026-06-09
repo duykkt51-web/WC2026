@@ -416,12 +416,18 @@ function renderPredictionOverview(list) {
     ? `<table class="prediction-overview-table">
         <thead>
           <tr>
+            <th colspan="7" class="group-head">Lịch thi đấu World Cup 2026</th>
+            <th colspan="${state.members.length}" class="group-head">Dự đoán</th>
+          </tr>
+          <tr>
             <th>#</th>
-            <th>Thời gian</th>
-            <th>Trận đấu</th>
-            <th>Sân</th>
-            <th>Đã dự đoán</th>
-            <th>Chưa dự đoán</th>
+            <th>Ngày</th>
+            <th>Giờ</th>
+            <th>Bảng/Vòng</th>
+            <th>Đội</th>
+            <th>Tỷ số</th>
+            <th>Đội</th>
+            ${state.members.map((member) => `<th>${shortMemberName(member)}</th>`).join("")}
           </tr>
         </thead>
         <tbody>${list.map(predictionOverviewRow).join("")}</tbody>
@@ -430,16 +436,31 @@ function renderPredictionOverview(list) {
 }
 
 function predictionOverviewRow(match) {
-  const predictedMembers = state.members.filter((member) => getPrediction(member, match.id));
-  const missingMembers = state.members.filter((member) => !getPrediction(member, match.id));
+  const result = state.results[match.id];
   return `<tr>
     <td>${match.number}</td>
-    <td>${formatDate(match.kickoffVietnam)}</td>
-    <td><strong>${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong></td>
-    <td>${escapeHtml(match.venue)}</td>
-    <td>${predictedMemberTags(predictedMembers, match.id)}</td>
-    <td>${memberTags(missingMembers, "warn")}</td>
+    <td>${formatShortDate(match.kickoffVietnam)}</td>
+    <td>${formatTime(match.kickoffVietnam)}</td>
+    <td>${escapeHtml(match.stage)}</td>
+    <td><strong>${escapeHtml(match.team1)}</strong></td>
+    <td class="score-cell">${result ? `${result.score1} - ${result.score2}` : ""}</td>
+    <td><strong>${escapeHtml(match.team2)}</strong></td>
+    ${state.members.map((member) => predictionCell(member, match)).join("")}
   </tr>`;
+}
+
+function predictionCell(member, match) {
+  const prediction = getPrediction(member, match.id);
+  const result = state.results[match.id];
+  if (!prediction) return `<td class="prediction-cell missing">-</td>`;
+  const exact = result && prediction.score1 === result.score1 && prediction.score2 === result.score2;
+  return `<td class="prediction-cell ${exact ? "exact" : ""}">${prediction.score1} - ${prediction.score2}</td>`;
+}
+
+function shortMemberName(member) {
+  const parts = String(member).trim().split(/\s+/);
+  if (parts.length <= 2) return member;
+  return `${parts[0][0]}.${parts.slice(-1)[0]}`;
 }
 
 function renderAwardPredictions() {
@@ -997,6 +1018,14 @@ function formatDateOnly(value) {
   return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "full",
   }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatShortDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(value));
 }
 
 function formatTime(value) {
