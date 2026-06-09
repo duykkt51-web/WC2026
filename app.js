@@ -89,11 +89,8 @@ const els = {
   notifyBtn: document.querySelector("#notifyBtn"),
   refreshBtn: document.querySelector("#refreshBtn"),
   stats: document.querySelector("#stats"),
-  upcomingMatches: document.querySelector("#upcomingMatches"),
-  reminderList: document.querySelector("#reminderList"),
   dailyStatusTitle: document.querySelector("#dailyStatusTitle"),
   todayPredictionStatus: document.querySelector("#todayPredictionStatus"),
-  dashboardSearch: document.querySelector("#dashboardSearch"),
   scheduleSearch: document.querySelector("#scheduleSearch"),
   scheduleList: document.querySelector("#scheduleList"),
   predictSearch: document.querySelector("#predictSearch"),
@@ -204,7 +201,6 @@ function bindEvents() {
     saveLocalConfig();
     renderAll();
   });
-  els.dashboardSearch.addEventListener("input", renderDashboard);
   els.scheduleSearch.addEventListener("input", renderSchedule);
   els.predictSearch.addEventListener("input", renderPredictions);
   els.predictFilter.addEventListener("change", renderPredictions);
@@ -280,31 +276,20 @@ function normalizeAwardPredictions(awardPredictions) {
 }
 
 function renderDashboard() {
-  const predictionsCount = Object.values(state.predictions).reduce(
-    (sum, byMatch) => sum + Object.keys(byMatch).length,
+  const dayMatches = dailyStatusMatches();
+  const totalSlots = dayMatches.length * state.members.length;
+  const predictedSlots = dayMatches.reduce(
+    (sum, match) => sum + state.members.filter((member) => getPrediction(member, match.id)).length,
     0
   );
-  const finance = financeSummary();
+  const missingSlots = Math.max(totalSlots - predictedSlots, 0);
+  const completionRate = totalSlots ? Math.round((predictedSlots / totalSlots) * 100) : 0;
   els.stats.innerHTML = [
-    stat("Trận", matches.length),
-    stat("Lượt dự đoán", predictionsCount),
-    stat("Tổng thu", formatMoney(finance.entryPool)),
-    stat("Giải cố định", formatMoney(finance.fixedPrize)),
+    stat("Số trận trong ngày", dayMatches.length),
+    stat("Lượt đã dự đoán", predictedSlots),
+    stat("Lượt chưa dự đoán", missingSlots),
+    stat("Hoàn thành", `${completionRate}%`),
   ].join("");
-
-  const query = norm(els.dashboardSearch.value);
-  const upcoming = nextTwoDayMatches()
-    .filter((match) => matchText(match).includes(query))
-    .filter((match) => !state.results[match.id]);
-  renderList(els.upcomingMatches, upcoming, (match) => matchCard(match, "summary"));
-
-  const missing = missingForMember(state.currentMember, upcoming);
-  renderList(
-    els.reminderList,
-    missing,
-    (match) => `<div class="personal-row"><strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong><span>${formatDate(match.kickoffVietnam)}</span></div>`,
-    "Không có trận cần nhắc cho thành viên hiện tại."
-  );
   renderDailyPredictionStatus();
 }
 
@@ -384,7 +369,7 @@ function predictionStatusCard(match) {
     <div class="status-grid">
       <div>
         <h4>Đã dự đoán</h4>
-        <div class="member-tags">${memberTags(predictedMembers, "good")}</div>
+        <div class="member-tags">${predictedMemberTags(predictedMembers, match.id)}</div>
       </div>
       <div>
         <h4>Chưa dự đoán</h4>
@@ -392,6 +377,17 @@ function predictionStatusCard(match) {
       </div>
     </div>
   </article>`;
+}
+
+function predictedMemberTags(members, matchId) {
+  return members.length
+    ? members
+        .map((member) => {
+          const prediction = getPrediction(member, matchId);
+          return `<span class="member-tag good">${escapeHtml(member)} <strong>${prediction.score1} - ${prediction.score2}</strong></span>`;
+        })
+        .join("")
+    : `<span class="muted">Không có</span>`;
 }
 
 function memberTags(members, type) {
