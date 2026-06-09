@@ -736,7 +736,7 @@ function groupMatchesByDate(list) {
 }
 
 function dateKey(value) {
-  return value ? new Date(value).toISOString().slice(0, 10) : "";
+  return value ? String(value).slice(0, 10) : "";
 }
 
 function isOpen(match) {
