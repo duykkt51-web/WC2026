@@ -2,7 +2,7 @@
 
 ## 1. Tạo Google Sheet
 
-1. Tạo một Google Sheet mới, ví dụ `World Cup 2026 Prediction Room`.
+1. Tạo một Google Sheet mới, ví dụ `Subsurface Oracle - World Cup 2026`.
 2. Vào `Extensions` -> `Apps Script`.
 3. Xóa nội dung mặc định trong `Code.gs`.
 4. Copy toàn bộ nội dung file `google-apps-script/Code.gs` của dự án này vào Apps Script.
