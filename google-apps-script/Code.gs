@@ -16,6 +16,10 @@ const DEFAULT_MEMBERS = [
   'Nguyễn Đình Chức',
 ];
 
+const MEMBER_NAME_ALIASES = {
+  'Nguyễn Đức Đồng': 'Nguyễn Đức Đông',
+};
+
 const DEFAULT_SETTINGS = {
   exactPoints: 3,
   outcomePoints: 1,
@@ -94,6 +98,7 @@ function ensureSheets_() {
 
   const settingsSheet = ss.getSheetByName('Settings');
   if (settingsSheet.getLastRow() < 2) saveSettings_(DEFAULT_SETTINGS);
+  migrateMemberNames_();
 }
 
 function ensureSheet_(ss, name, headers) {
@@ -124,6 +129,7 @@ function readMembers_() {
     .getValues()
     .flat()
     .map((name) => String(name).trim())
+    .map((name) => MEMBER_NAME_ALIASES[name] || name)
     .filter(Boolean);
 }
 
@@ -136,7 +142,7 @@ function readPredictions_() {
     const [matchId, member, score1, score2, savedAt] = row;
     if (!matchId || !member) return;
     if (!data[matchId]) data[matchId] = {};
-    data[matchId][member] = {
+    data[matchId][MEMBER_NAME_ALIASES[member] || member] = {
       score1: Number(score1),
       score2: Number(score2),
       savedAt: savedAt || '',
@@ -231,6 +237,27 @@ function resetVotes_() {
   const results = ss.getSheetByName('Results');
   results.clearContents();
   results.getRange(1, 1, 1, 4).setValues([['matchId', 'score1', 'score2', 'updatedAt']]);
+}
+
+function migrateMemberNames_() {
+  migrateColumnValues_('Members', 1);
+  migrateColumnValues_('Predictions', 2);
+}
+
+function migrateColumnValues_(sheetName, columnIndex) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+  const range = sheet.getRange(2, columnIndex, lastRow - 1, 1);
+  const values = range.getValues();
+  let changed = false;
+  const nextValues = values.map((row) => {
+    const current = String(row[0] || '').trim();
+    const next = MEMBER_NAME_ALIASES[current] || row[0];
+    if (next !== row[0]) changed = true;
+    return [next];
+  });
+  if (changed) range.setValues(nextValues);
 }
 
 function upsertRow_(sheetName, columnCount, predicate, values) {

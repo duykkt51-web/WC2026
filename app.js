@@ -18,6 +18,10 @@ const defaultMembers = [
   "Nguyễn Đình Chức",
 ];
 
+const memberNameAliases = {
+  "Nguyễn Đức Đồng": "Nguyễn Đức Đông",
+};
+
 const defaultSettings = {
   exactPoints: 3,
   outcomePoints: 1,
@@ -155,8 +159,8 @@ async function refreshSharedState() {
   try {
     setApiStatus("Đang đồng bộ...", "");
     const remote = await apiCall("getState");
-    state.members = remote.members?.length ? remote.members : defaultMembers;
-    state.predictions = remote.predictions || {};
+    state.members = normalizeMembers(remote.members?.length ? remote.members : defaultMembers);
+    state.predictions = normalizePredictions(remote.predictions || {});
     state.results = remote.results || {};
     state.settings = { ...defaultSettings, ...(remote.settings || {}) };
     state.currentMember = state.members.includes(localConfig.currentMember)
@@ -230,6 +234,21 @@ function renderMemberSelect() {
   });
   if (!state.members.includes(state.currentMember)) state.currentMember = state.members[0] || "";
   els.memberSelect.value = state.currentMember;
+}
+
+function normalizeMembers(members) {
+  return members.map((member) => memberNameAliases[member] || member);
+}
+
+function normalizePredictions(predictions) {
+  const normalized = {};
+  Object.entries(predictions).forEach(([matchId, byMember]) => {
+    normalized[matchId] = {};
+    Object.entries(byMember || {}).forEach(([member, prediction]) => {
+      normalized[matchId][memberNameAliases[member] || member] = prediction;
+    });
+  });
+  return normalized;
 }
 
 function renderDashboard() {
