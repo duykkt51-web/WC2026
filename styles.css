@@ -433,6 +433,53 @@ main {
   min-width: 300px;
 }
 
+.rules-block {
+  line-height: 1.55;
+}
+
+.rules-block h2 {
+  text-transform: uppercase;
+}
+
+.rules-section {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.rules-section h3 {
+  margin: 0 0 10px;
+}
+
+.rules-section ul,
+.rules-section ol {
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+
+.rules-section li {
+  margin: 6px 0;
+}
+
+.rules-table {
+  max-width: 760px;
+}
+
+.rules-table th {
+  background: var(--surface-2);
+}
+
+.rules-table td:last-child {
+  font-weight: 800;
+}
+
+.prize-highlight {
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 900;
+  margin: 8px 0 14px;
+}
+
 .status-card {
   border: 1px solid var(--line);
   border-radius: 8px;
