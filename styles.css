@@ -297,10 +297,105 @@ main {
   margin-top: 16px;
 }
 
+.status-block {
+  margin-top: 16px;
+}
+
 .finance-grid {
   display: grid;
   grid-template-columns: minmax(360px, 0.85fr) minmax(520px, 1.15fr);
   gap: 16px;
+}
+
+.day-list,
+.status-list {
+  display: grid;
+  gap: 14px;
+}
+
+.day-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.day-group h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  font-size: 17px;
+}
+
+.day-group h3 span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.schedule-table td,
+.schedule-table th {
+  white-space: normal;
+}
+
+.status-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.status-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.status-head strong,
+.status-head span {
+  display: block;
+}
+
+.status-head span:not(.pill) {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.status-grid h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.member-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.member-tag {
+  border-radius: 999px;
+  font-size: 13px;
+  padding: 5px 8px;
+}
+
+.member-tag.good {
+  background: #dff2e8;
+  color: var(--good);
+}
+
+.member-tag.warn {
+  background: #fff1d6;
+  color: var(--warn);
 }
 
 table {
@@ -386,8 +481,13 @@ tfoot td:last-child,
   .grid.two,
   .stats,
   .finance-grid,
+  .status-grid,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .status-head {
+    flex-direction: column;
   }
 
   .teams {

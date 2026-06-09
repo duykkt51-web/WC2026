@@ -86,7 +86,11 @@ const els = {
   stats: document.querySelector("#stats"),
   upcomingMatches: document.querySelector("#upcomingMatches"),
   reminderList: document.querySelector("#reminderList"),
+  dailyStatusTitle: document.querySelector("#dailyStatusTitle"),
+  todayPredictionStatus: document.querySelector("#todayPredictionStatus"),
   dashboardSearch: document.querySelector("#dashboardSearch"),
+  scheduleSearch: document.querySelector("#scheduleSearch"),
+  scheduleList: document.querySelector("#scheduleList"),
   predictSearch: document.querySelector("#predictSearch"),
   predictFilter: document.querySelector("#predictFilter"),
   predictionList: document.querySelector("#predictionList"),
@@ -192,6 +196,7 @@ function bindEvents() {
     renderAll();
   });
   els.dashboardSearch.addEventListener("input", renderDashboard);
+  els.scheduleSearch.addEventListener("input", renderSchedule);
   els.predictSearch.addEventListener("input", renderPredictions);
   els.predictFilter.addEventListener("change", renderPredictions);
   els.resultSearch.addEventListener("input", renderResults);
@@ -210,6 +215,7 @@ function renderAll() {
   renderMemberSelect();
   renderHeader();
   renderDashboard();
+  renderSchedule();
   renderPredictions();
   renderResults();
   renderLeaderboard();
@@ -265,19 +271,111 @@ function renderDashboard() {
   ].join("");
 
   const query = norm(els.dashboardSearch.value);
-  const upcoming = matches
-    .filter((match) => !state.results[match.id])
+  const upcoming = nextTwoDayMatches()
     .filter((match) => matchText(match).includes(query))
-    .slice(0, 12);
+    .filter((match) => !state.results[match.id]);
   renderList(els.upcomingMatches, upcoming, (match) => matchCard(match, "summary"));
 
-  const missing = missingForMember(state.currentMember, nextReminderMatches());
+  const missing = missingForMember(state.currentMember, upcoming);
   renderList(
     els.reminderList,
     missing,
     (match) => `<div class="personal-row"><strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong><span>${formatDate(match.kickoffVietnam)}</span></div>`,
     "Không có trận cần nhắc cho thành viên hiện tại."
   );
+  renderDailyPredictionStatus();
+}
+
+function renderSchedule() {
+  const query = norm(els.scheduleSearch.value);
+  const filtered = matches.filter((match) => matchText(match).includes(query));
+  const grouped = groupMatchesByDate(filtered);
+  const days = Object.keys(grouped).sort();
+
+  els.scheduleList.innerHTML = days.length
+    ? days
+        .map(
+          (day) => `<section class="day-group">
+            <h3>${formatDateOnly(day)} <span>${grouped[day].length} trận</span></h3>
+            <div class="table-wrap">
+              <table class="schedule-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Giờ VN</th>
+                    <th>Đội 1</th>
+                    <th>Đội 2</th>
+                    <th>Sân</th>
+                    <th>Dự đoán</th>
+                    <th>Kết quả</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${grouped[day].map(scheduleRow).join("")}
+                </tbody>
+              </table>
+            </div>
+          </section>`
+        )
+        .join("")
+    : `<p class="empty">Không có trận phù hợp.</p>`;
+}
+
+function scheduleRow(match) {
+  const predictedCount = state.members.length - missingCount(match);
+  const result = state.results[match.id];
+  return `<tr>
+    <td>${match.number}</td>
+    <td>${formatTime(match.kickoffVietnam)}</td>
+    <td><strong>${escapeHtml(match.team1)}</strong></td>
+    <td><strong>${escapeHtml(match.team2)}</strong></td>
+    <td>${escapeHtml(match.venue)}</td>
+    <td>${predictedCount}/${state.members.length}</td>
+    <td>${result ? `${result.score1} - ${result.score2}` : "Chưa có"}</td>
+  </tr>`;
+}
+
+function renderDailyPredictionStatus() {
+  const dayMatches = dailyStatusMatches();
+  if (!dayMatches.length) {
+    els.dailyStatusTitle.textContent = "Theo dõi dự đoán trong ngày";
+    els.todayPredictionStatus.innerHTML = `<p class="empty">Không có trận trong hôm nay hoặc 2 ngày tới.</p>`;
+    return;
+  }
+
+  const dayKey = dateKey(dayMatches[0].kickoffVietnam);
+  els.dailyStatusTitle.textContent = `Theo dõi dự đoán ngày ${formatDateOnly(dayKey)}`;
+  els.todayPredictionStatus.innerHTML = dayMatches.map(predictionStatusCard).join("");
+}
+
+function predictionStatusCard(match) {
+  const predictedMembers = state.members.filter((member) => getPrediction(member, match.id));
+  const missingMembers = state.members.filter((member) => !getPrediction(member, match.id));
+  return `<article class="status-card">
+    <div class="status-head">
+      <div>
+        <strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong>
+        <span>${formatDate(match.kickoffVietnam)} · ${escapeHtml(match.venue)}</span>
+      </div>
+      <span class="pill ${missingMembers.length ? "warn" : "good"}">${predictedMembers.length}/${state.members.length} đã dự đoán</span>
+    </div>
+    <div class="status-grid">
+      <div>
+        <h4>Đã dự đoán</h4>
+        <div class="member-tags">${memberTags(predictedMembers, "good")}</div>
+      </div>
+      <div>
+        <h4>Chưa dự đoán</h4>
+        <div class="member-tags">${memberTags(missingMembers, "warn")}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function memberTags(members, type) {
+  return members.length
+    ? members.map((member) => `<span class="member-tag ${type}">${escapeHtml(member)}</span>`).join("")
+    : `<span class="muted">Không có</span>`;
 }
 
 function renderPredictions() {
@@ -547,9 +645,49 @@ function nextReminderMatches() {
   });
 }
 
+function nextTwoDayMatches() {
+  const now = new Date();
+  const end = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+  return matches
+    .filter((match) => {
+      const kickoff = new Date(match.kickoffVietnam);
+      return kickoff >= now && kickoff <= end;
+    })
+    .sort((a, b) => new Date(a.kickoffVietnam) - new Date(b.kickoffVietnam));
+}
+
+function dailyStatusMatches() {
+  const today = new Date().toISOString().slice(0, 10);
+  const todayList = matchesForDate(today);
+  if (todayList.length) return todayList;
+  const nextTwoDays = nextTwoDayMatches();
+  if (!nextTwoDays.length) return [];
+  return matchesForDate(dateKey(nextTwoDays[0].kickoffVietnam));
+}
+
 function todayMatches() {
   const today = new Date().toISOString().slice(0, 10);
-  return matches.filter((match) => match.kickoffVietnam?.slice(0, 10) === today);
+  return matchesForDate(today);
+}
+
+function matchesForDate(dayKey) {
+  return matches
+    .filter((match) => dateKey(match.kickoffVietnam) === dayKey)
+    .sort((a, b) => new Date(a.kickoffVietnam) - new Date(b.kickoffVietnam));
+}
+
+function groupMatchesByDate(list) {
+  return list.reduce((groups, match) => {
+    const key = dateKey(match.kickoffVietnam) || "unknown";
+    groups[key] ||= [];
+    groups[key].push(match);
+    groups[key].sort((a, b) => new Date(a.kickoffVietnam) - new Date(b.kickoffVietnam));
+    return groups;
+  }, {});
+}
+
+function dateKey(value) {
+  return value ? new Date(value).toISOString().slice(0, 10) : "";
 }
 
 function isOpen(match) {
@@ -746,6 +884,21 @@ function formatDate(value) {
   return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
     timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function formatDateOnly(value) {
+  if (!value || value === "unknown") return "Chưa rõ ngày";
+  return new Intl.DateTimeFormat("vi-VN", {
+    dateStyle: "full",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatTime(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(value));
 }
 

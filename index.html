@@ -22,6 +22,8 @@
 
     <nav class="tabs" aria-label="Khu vực chức năng">
       <button class="tab active" data-tab="dashboard" type="button">Tổng quan</button>
+      <button class="tab" data-tab="schedule" type="button">Lịch trận</button>
+      <button class="tab" data-tab="finance" type="button">Chi phí</button>
       <button class="tab" data-tab="predict" type="button">Dự đoán</button>
       <button class="tab" data-tab="results" type="button">Kết quả</button>
       <button class="tab" data-tab="leaderboard" type="button">BXH</button>
@@ -45,10 +47,27 @@
             <div id="reminderList" class="reminder-list"></div>
           </section>
         </div>
-        <section class="block finance-block">
+        <section class="block status-block">
           <div class="block-head">
-            <h2>Chi phí và giải thưởng</h2>
+            <h2 id="dailyStatusTitle">Theo dõi dự đoán trong ngày</h2>
           </div>
+          <div id="todayPredictionStatus" class="status-list"></div>
+        </section>
+      </section>
+
+      <section id="schedule" class="panel">
+        <div class="block">
+          <div class="block-head">
+            <h2>Lịch trận toàn bộ</h2>
+            <input id="scheduleSearch" type="search" placeholder="Tìm đội, sân, mã trận" />
+          </div>
+          <div id="scheduleList" class="day-list"></div>
+        </div>
+      </section>
+
+      <section id="finance" class="panel">
+        <section class="block finance-block">
+          <h2>Chi phí và giải thưởng</h2>
           <div class="finance-grid">
             <div class="table-wrap">
               <table>
