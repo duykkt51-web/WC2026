@@ -70,6 +70,7 @@ Phí phải đóng:
 
 - Mỗi lượt dự đoán tạm tính 30.000 VNĐ.
 - Nếu thành viên đoán đúng tỷ số sau khi có kết quả, thành viên đó được miễn phí trận đó.
+- Nếu trận đã có kết quả mà thành viên không dự đoán, thành viên đó bị tính thua và phải đóng 30.000 VNĐ.
 - Vì vậy tổng thu thực tế có thể thấp hơn tổng tối đa `104 trận × 30.000 VNĐ × 15 người`.
 
 Toàn bộ dữ liệu chung nằm trong Google Sheet ở các tab:

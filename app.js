@@ -756,8 +756,8 @@ function memberFee(member) {
 
 function memberMatchFee(member, match, fee = Number(state.settings.matchFee || defaultSettings.matchFee)) {
   const prediction = getPrediction(member, match.id);
-  if (!prediction) return 0;
   const result = state.results[match.id];
+  if (!prediction) return result ? fee : 0;
   if (result && prediction.score1 === result.score1 && prediction.score2 === result.score2) return 0;
   return fee;
 }
