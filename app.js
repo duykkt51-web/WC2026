@@ -97,6 +97,7 @@ const els = {
   predictSearch: document.querySelector("#predictSearch"),
   predictFilter: document.querySelector("#predictFilter"),
   predictionList: document.querySelector("#predictionList"),
+  predictionOverview: document.querySelector("#predictionOverview"),
   awardPredictionForm: document.querySelector("#awardPredictionForm"),
   awardPredictionMatrix: document.querySelector("#awardPredictionMatrix"),
   refreshAwardsBtn: document.querySelector("#refreshAwardsBtn"),
@@ -395,13 +396,50 @@ function memberTags(members, type) {
 
 function renderPredictions() {
   const member = state.currentMember;
+  const list = filteredPredictionMatches(member);
+  renderList(els.predictionList, list, (match) => matchCard(match, "predict"));
+  renderPredictionOverview(list);
+}
+
+function filteredPredictionMatches(member) {
   const query = norm(els.predictSearch.value);
   const filter = els.predictFilter.value;
   let list = matches.filter((match) => matchText(match).includes(query));
   if (filter === "open") list = list.filter(isOpen);
   if (filter === "missing") list = list.filter((match) => !getPrediction(member, match.id));
   if (filter === "scored") list = list.filter((match) => state.results[match.id]);
-  renderList(els.predictionList, list, (match) => matchCard(match, "predict"));
+  return list;
+}
+
+function renderPredictionOverview(list) {
+  els.predictionOverview.innerHTML = list.length
+    ? `<table class="prediction-overview-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Thời gian</th>
+            <th>Trận đấu</th>
+            <th>Sân</th>
+            <th>Đã dự đoán</th>
+            <th>Chưa dự đoán</th>
+          </tr>
+        </thead>
+        <tbody>${list.map(predictionOverviewRow).join("")}</tbody>
+      </table>`
+    : `<p class="empty">Không có trận phù hợp.</p>`;
+}
+
+function predictionOverviewRow(match) {
+  const predictedMembers = state.members.filter((member) => getPrediction(member, match.id));
+  const missingMembers = state.members.filter((member) => !getPrediction(member, match.id));
+  return `<tr>
+    <td>${match.number}</td>
+    <td>${formatDate(match.kickoffVietnam)}</td>
+    <td><strong>${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong></td>
+    <td>${escapeHtml(match.venue)}</td>
+    <td>${predictedMemberTags(predictedMembers, match.id)}</td>
+    <td>${memberTags(missingMembers, "warn")}</td>
+  </tr>`;
 }
 
 function renderAwardPredictions() {

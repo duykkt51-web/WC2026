@@ -214,6 +214,10 @@ main {
   gap: 10px;
 }
 
+.prediction-overview-block {
+  margin-top: 16px;
+}
+
 .match-card {
   padding: 14px;
 }
@@ -338,6 +342,16 @@ main {
 
 .schedule-table td,
 .schedule-table th {
+  white-space: normal;
+}
+
+.prediction-overview-table {
+  min-width: 1100px;
+}
+
+.prediction-overview-table th,
+.prediction-overview-table td {
+  vertical-align: top;
   white-space: normal;
 }
 
