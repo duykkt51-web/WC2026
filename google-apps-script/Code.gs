@@ -61,6 +61,9 @@ function route_(params) {
       case 'savePrediction':
         savePrediction_(params);
         return getState_();
+      case 'saveAwardPrediction':
+        saveAwardPrediction_(params);
+        return getState_();
       case 'saveResult':
         saveResult_(params);
         return getState_();
@@ -88,6 +91,7 @@ function ensureSheets_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   ensureSheet_(ss, 'Members', ['name']);
   ensureSheet_(ss, 'Predictions', ['matchId', 'member', 'score1', 'score2', 'savedAt']);
+  ensureSheet_(ss, 'AwardPredictions', ['awardKey', 'awardLabel', 'member', 'prediction', 'savedAt']);
   ensureSheet_(ss, 'Results', ['matchId', 'score1', 'score2', 'updatedAt']);
   ensureSheet_(ss, 'Settings', ['key', 'value']);
 
@@ -115,6 +119,7 @@ function getState_() {
   return {
     members: readMembers_(),
     predictions: readPredictions_(),
+    awardPredictions: readAwardPredictions_(),
     results: readResults_(),
     settings: readSettings_(),
   };
@@ -145,6 +150,24 @@ function readPredictions_() {
     data[matchId][MEMBER_NAME_ALIASES[member] || member] = {
       score1: Number(score1),
       score2: Number(score2),
+      savedAt: savedAt || '',
+    };
+  });
+  return data;
+}
+
+function readAwardPredictions_() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('AwardPredictions');
+  const lastRow = sheet.getLastRow();
+  const data = {};
+  if (lastRow < 2) return data;
+  sheet.getRange(2, 1, lastRow - 1, 5).getValues().forEach((row) => {
+    const [awardKey, awardLabel, member, prediction, savedAt] = row;
+    if (!awardKey || !member) return;
+    if (!data[awardKey]) data[awardKey] = {};
+    data[awardKey][MEMBER_NAME_ALIASES[member] || member] = {
+      awardLabel: awardLabel || '',
+      prediction: prediction || '',
       savedAt: savedAt || '',
     };
   });
@@ -199,6 +222,21 @@ function savePrediction_(params) {
   ]);
 }
 
+function saveAwardPrediction_(params) {
+  const awardKey = String(params.awardKey || '').trim();
+  const awardLabel = String(params.awardLabel || '').trim();
+  const member = String(params.member || '').trim();
+  const prediction = String(params.prediction || '').trim();
+  if (!awardKey || !member || !prediction) throw new Error('Invalid award prediction');
+  upsertRow_('AwardPredictions', 5, (row) => row[0] === awardKey && row[2] === member, [
+    awardKey,
+    awardLabel,
+    member,
+    prediction,
+    new Date().toISOString(),
+  ]);
+}
+
 function saveResult_(params) {
   const matchId = String(params.matchId || '').trim();
   const score1 = Number(params.score1);
@@ -234,6 +272,9 @@ function resetVotes_() {
   const predictions = ss.getSheetByName('Predictions');
   predictions.clearContents();
   predictions.getRange(1, 1, 1, 5).setValues([['matchId', 'member', 'score1', 'score2', 'savedAt']]);
+  const awardPredictions = ss.getSheetByName('AwardPredictions');
+  awardPredictions.clearContents();
+  awardPredictions.getRange(1, 1, 1, 5).setValues([['awardKey', 'awardLabel', 'member', 'prediction', 'savedAt']]);
   const results = ss.getSheetByName('Results');
   results.clearContents();
   results.getRange(1, 1, 1, 4).setValues([['matchId', 'score1', 'score2', 'updatedAt']]);
@@ -242,6 +283,7 @@ function resetVotes_() {
 function migrateMemberNames_() {
   migrateColumnValues_('Members', 1);
   migrateColumnValues_('Predictions', 2);
+  migrateColumnValues_('AwardPredictions', 3);
 }
 
 function migrateColumnValues_(sheetName, columnIndex) {

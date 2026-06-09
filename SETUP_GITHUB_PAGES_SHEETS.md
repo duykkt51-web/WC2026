@@ -58,10 +58,13 @@ Toàn bộ dữ liệu chung nằm trong Google Sheet ở các tab:
 
 - `Members`
 - `Predictions`
+- `AwardPredictions`
 - `Results`
 - `Settings`
 
 Nếu đã deploy Apps Script trước đó, hãy copy lại file `google-apps-script/Code.gs`, bấm `Save`, rồi deploy `New version` để Google Sheets nhận cấu hình `matchFee = 30000`.
+
+Khi thêm dự đoán giải thưởng, chạy lại hàm `setup()` hoặc mở app và bấm `Đồng bộ` sau khi deploy `Code.gs` mới để Apps Script tạo tab `AwardPredictions`.
 
 Với danh sách mặc định 15 người, phí dự đoán toàn bộ 104 trận là:
 

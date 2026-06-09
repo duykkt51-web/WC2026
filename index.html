@@ -25,6 +25,7 @@
       <button class="tab" data-tab="schedule" type="button">Lịch trận</button>
       <button class="tab" data-tab="finance" type="button">Chi phí</button>
       <button class="tab" data-tab="predict" type="button">Dự đoán</button>
+      <button class="tab" data-tab="awardPredictions" type="button">Dự đoán giải</button>
       <button class="tab" data-tab="results" type="button">Kết quả</button>
       <button class="tab" data-tab="leaderboard" type="button">BXH</button>
       <button class="tab" data-tab="personal" type="button">Cá nhân</button>
@@ -116,6 +117,22 @@
           </select>
         </div>
         <div id="predictionList" class="match-list"></div>
+      </section>
+
+      <section id="awardPredictions" class="panel">
+        <div class="grid two">
+          <section class="block">
+            <h2>Dự đoán giải cá nhân</h2>
+            <div id="awardPredictionForm" class="award-form"></div>
+          </section>
+          <section class="block">
+            <div class="block-head">
+              <h2>Tổng hợp 15 thành viên</h2>
+              <button id="refreshAwardsBtn" class="secondary" type="button">Đồng bộ</button>
+            </div>
+            <div id="awardPredictionMatrix" class="table-wrap"></div>
+          </section>
+        </div>
       </section>
 
       <section id="results" class="panel">

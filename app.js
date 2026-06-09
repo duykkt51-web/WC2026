@@ -43,23 +43,27 @@ const costRows = [
 ];
 
 const fixedPrizeRows = [
-  { label: "Nhà Vô địch World Cup 2026", valueLabel: "Tổng Giá trị 1.000.000 VNĐ", amount: 1000000 },
+  { key: "champion", label: "Nhà Vô địch World Cup 2026", valueLabel: "Tổng Giá trị 1.000.000 VNĐ", amount: 1000000 },
   {
+    key: "goldenBall",
     label: "Quả bóng Vàng (Golden Ball): Cầu thủ xuất sắc nhất giải đấu",
     valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
     amount: 1000000,
   },
   {
+    key: "goldenBoot",
     label: "Chiếc giày Vàng (Golden Boot): Vua phá lưới",
     valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
     amount: 1000000,
   },
   {
+    key: "goldenGlove",
     label: "Găng tay Vàng (Golden Glove): Thủ môn xuất sắc nhất",
     valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
     amount: 1000000,
   },
   {
+    key: "fairPlay",
     label: "Giải phong cách (FIFA Fair Play Trophy): Đội bóng có lối chơi và hành vi đẹp nhất giải",
     valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
     amount: 1000000,
@@ -71,6 +75,7 @@ let state = {
   members: defaultMembers,
   currentMember: defaultMembers[0],
   predictions: {},
+  awardPredictions: {},
   results: {},
   settings: { ...defaultSettings },
   lastReminderDate: "",
@@ -94,6 +99,9 @@ const els = {
   predictSearch: document.querySelector("#predictSearch"),
   predictFilter: document.querySelector("#predictFilter"),
   predictionList: document.querySelector("#predictionList"),
+  awardPredictionForm: document.querySelector("#awardPredictionForm"),
+  awardPredictionMatrix: document.querySelector("#awardPredictionMatrix"),
+  refreshAwardsBtn: document.querySelector("#refreshAwardsBtn"),
   resultSearch: document.querySelector("#resultSearch"),
   resultList: document.querySelector("#resultList"),
   syncResultsBtn: document.querySelector("#syncResultsBtn"),
@@ -165,6 +173,7 @@ async function refreshSharedState() {
     const remote = await apiCall("getState");
     state.members = normalizeMembers(remote.members?.length ? remote.members : defaultMembers);
     state.predictions = normalizePredictions(remote.predictions || {});
+    state.awardPredictions = normalizeAwardPredictions(remote.awardPredictions || {});
     state.results = remote.results || {};
     state.settings = { ...defaultSettings, ...(remote.settings || {}) };
     state.currentMember = state.members.includes(localConfig.currentMember)
@@ -199,6 +208,7 @@ function bindEvents() {
   els.scheduleSearch.addEventListener("input", renderSchedule);
   els.predictSearch.addEventListener("input", renderPredictions);
   els.predictFilter.addEventListener("change", renderPredictions);
+  els.refreshAwardsBtn.addEventListener("click", refreshSharedState);
   els.resultSearch.addEventListener("input", renderResults);
   els.personalFilter.addEventListener("change", renderPersonal);
   els.notifyBtn.addEventListener("click", requestNotifications);
@@ -217,6 +227,7 @@ function renderAll() {
   renderDashboard();
   renderSchedule();
   renderPredictions();
+  renderAwardPredictions();
   renderResults();
   renderLeaderboard();
   renderPersonal();
@@ -252,6 +263,17 @@ function normalizePredictions(predictions) {
     normalized[matchId] = {};
     Object.entries(byMember || {}).forEach(([member, prediction]) => {
       normalized[matchId][memberNameAliases[member] || member] = prediction;
+    });
+  });
+  return normalized;
+}
+
+function normalizeAwardPredictions(awardPredictions) {
+  const normalized = {};
+  Object.entries(awardPredictions).forEach(([awardKey, byMember]) => {
+    normalized[awardKey] = {};
+    Object.entries(byMember || {}).forEach(([member, prediction]) => {
+      normalized[awardKey][memberNameAliases[member] || member] = prediction;
     });
   });
   return normalized;
@@ -387,6 +409,50 @@ function renderPredictions() {
   if (filter === "missing") list = list.filter((match) => !getPrediction(member, match.id));
   if (filter === "scored") list = list.filter((match) => state.results[match.id]);
   renderList(els.predictionList, list, (match) => matchCard(match, "predict"));
+}
+
+function renderAwardPredictions() {
+  renderAwardPredictionForm();
+  renderAwardPredictionMatrix();
+}
+
+function renderAwardPredictionForm() {
+  els.awardPredictionForm.innerHTML = fixedPrizeRows
+    .map((award) => {
+      const prediction = getAwardPrediction(state.currentMember, award.key);
+      return `<article class="award-row">
+        <label>
+          <strong>${escapeHtml(award.label)}</strong>
+          <input type="text" value="${escapeHtml(prediction)}" data-award-input="${award.key}" placeholder="Nhập đội/cầu thủ dự đoán" />
+        </label>
+        <button type="button" data-save-award="${award.key}">Lưu</button>
+      </article>`;
+    })
+    .join("");
+}
+
+function renderAwardPredictionMatrix() {
+  const headerCells = state.members.map((member) => `<th>${escapeHtml(member)}</th>`).join("");
+  const rows = fixedPrizeRows
+    .map(
+      (award) => `<tr>
+        <td><strong>${escapeHtml(award.label)}</strong></td>
+        ${state.members
+          .map((member) => `<td>${escapeHtml(getAwardPrediction(member, award.key) || "Chưa dự đoán")}</td>`)
+          .join("")}
+      </tr>`
+    )
+    .join("");
+
+  els.awardPredictionMatrix.innerHTML = `<table class="award-matrix">
+    <thead>
+      <tr>
+        <th>Hạng mục</th>
+        ${headerCells}
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function renderResults() {
@@ -534,6 +600,8 @@ function matchCard(match, mode) {
 document.addEventListener("click", (event) => {
   const predId = event.target.dataset.savePred;
   if (predId) savePrediction(predId);
+  const awardKey = event.target.dataset.saveAward;
+  if (awardKey) saveAwardPrediction(awardKey);
   const resultId = event.target.dataset.saveResult;
   if (resultId) saveResult(resultId);
   const clearId = event.target.dataset.clearResult;
@@ -547,6 +615,21 @@ async function savePrediction(matchId) {
   const score2 = numberFromInput(inputs.find((input) => input.dataset.side === "score2"));
   if (score1 === null || score2 === null) return alert("Nhập đủ tỉ số dự đoán.");
   await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2 });
+  await refreshSharedState();
+}
+
+async function saveAwardPrediction(awardKey) {
+  if (!requireApi()) return;
+  const award = fixedPrizeRows.find((item) => item.key === awardKey);
+  const input = document.querySelector(`[data-award-input="${awardKey}"]`);
+  const prediction = input?.value.trim();
+  if (!award || !prediction) return alert("Nhập nội dung dự đoán trước khi lưu.");
+  await apiCall("saveAwardPrediction", {
+    awardKey,
+    awardLabel: award.label,
+    member: state.currentMember,
+    prediction,
+  });
   await refreshSharedState();
 }
 
@@ -626,6 +709,10 @@ function financeSummary() {
 
 function getPrediction(member, matchId) {
   return state.predictions[matchId]?.[member];
+}
+
+function getAwardPrediction(member, awardKey) {
+  return state.awardPredictions[awardKey]?.[member]?.prediction || "";
 }
 
 function missingCount(match) {
