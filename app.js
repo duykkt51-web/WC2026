@@ -23,10 +23,11 @@ const memberNameAliases = {
 };
 
 const defaultSettings = {
-  exactPoints: 3,
-  outcomePoints: 1,
-  wrongPenalty: 0,
-  missedPenalty: 0,
+  groupExactPoints: 1,
+  roundOf32ExactPoints: 2,
+  quarterFinalExactPoints: 3,
+  semiFinalExactPoints: 4,
+  finalExactPoints: 5,
   matchFee: 30000,
   resultsUrl: "",
   reminderTime: "09:00",
@@ -107,10 +108,11 @@ const els = {
   exportSettingsBtn: document.querySelector("#exportSettingsBtn"),
   membersInput: document.querySelector("#membersInput"),
   saveMembersBtn: document.querySelector("#saveMembersBtn"),
-  exactPoints: document.querySelector("#exactPoints"),
-  outcomePoints: document.querySelector("#outcomePoints"),
-  wrongPenalty: document.querySelector("#wrongPenalty"),
-  missedPenalty: document.querySelector("#missedPenalty"),
+  groupExactPoints: document.querySelector("#groupExactPoints"),
+  roundOf32ExactPoints: document.querySelector("#roundOf32ExactPoints"),
+  quarterFinalExactPoints: document.querySelector("#quarterFinalExactPoints"),
+  semiFinalExactPoints: document.querySelector("#semiFinalExactPoints"),
+  finalExactPoints: document.querySelector("#finalExactPoints"),
   matchFee: document.querySelector("#matchFee"),
   resultsUrl: document.querySelector("#resultsUrl"),
   reminderTime: document.querySelector("#reminderTime"),
@@ -462,7 +464,6 @@ function renderLeaderboard() {
         <td><strong>${escapeHtml(row.name)}</strong></td>
         <td>${row.points}</td>
         <td>${row.exact}</td>
-        <td>${row.outcome}</td>
         <td>${row.wrong}</td>
         <td>${row.missed}</td>
         <td>${formatMoney(row.money)}</td>
@@ -635,21 +636,38 @@ function scorePrediction(member, match) {
   if (!prediction) {
     return {
       status: "missed",
-      points: Number(state.settings.missedPenalty),
+      points: 0,
       counted: true,
     };
   }
   if (prediction.score1 === result.score1 && prediction.score2 === result.score2) {
-    return { status: "exact", points: Number(state.settings.exactPoints), counted: true };
-  }
-  if (outcome(prediction.score1, prediction.score2) === outcome(result.score1, result.score2)) {
-    return { status: "outcome", points: Number(state.settings.outcomePoints), counted: true };
+    return { status: "exact", points: exactPointsForMatch(match), counted: true };
   }
   return {
     status: "wrong",
-    points: Number(state.settings.wrongPenalty),
+    points: 0,
     counted: true,
   };
+}
+
+function exactPointsForMatch(match) {
+  const stage = String(match.stage || "").toLowerCase();
+  if (stage.includes("final") && !stage.includes("semi") && !stage.includes("quarter")) {
+    return Number(state.settings.finalExactPoints || defaultSettings.finalExactPoints);
+  }
+  if (stage.includes("semi")) {
+    return Number(state.settings.semiFinalExactPoints || defaultSettings.semiFinalExactPoints);
+  }
+  if (stage.includes("third place")) {
+    return Number(state.settings.semiFinalExactPoints || defaultSettings.semiFinalExactPoints);
+  }
+  if (stage.includes("quarter")) {
+    return Number(state.settings.quarterFinalExactPoints || defaultSettings.quarterFinalExactPoints);
+  }
+  if (stage.includes("round of 32") || stage.includes("round of 16")) {
+    return Number(state.settings.roundOf32ExactPoints || defaultSettings.roundOf32ExactPoints);
+  }
+  return Number(state.settings.groupExactPoints || defaultSettings.groupExactPoints);
 }
 
 function memberFee(member) {

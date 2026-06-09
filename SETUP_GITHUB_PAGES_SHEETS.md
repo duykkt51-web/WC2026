@@ -24,7 +24,7 @@ Lưu ý: URL này cho phép app ghi vào Google Sheet theo quyền của chủ f
 ## 3. Kết nối trong app
 
 1. Mở app `worldcup-prediction/index.html` sau khi deploy lên GitHub Pages.
-2. Vào tab `Cài đặt`.
+2. Vào tab `Quản trị`.
 3. Dán URL Web App Apps Script vào ô `URL Web App Apps Script`.
 4. Bấm `Lưu cài đặt`.
 5. Trạng thái trên góc phải sẽ chuyển sang `Đã kết nối Google Sheets`.
@@ -52,7 +52,19 @@ Các file cần có trên GitHub Pages:
 - Tab `Kết quả`: người quản lý nhập kết quả thật.
 - Tab `BXH`: tự tính điểm và tiền.
 - Tab `Tổng quan`: xem bảng chi phí 104 trận, phí 30.000/trận/người và hệ thống giải thưởng.
-- Tab `Cài đặt`: sửa danh sách thành viên, luật điểm, phí tham gia/trận.
+- Tab `Quản trị`: sửa danh sách thành viên, luật điểm, phí tham gia/trận, nhập kết quả và xem chi phí.
+
+## 6. Luật điểm
+
+Chỉ cộng điểm khi dự đoán đúng tỷ số.
+
+- Vòng bảng: 1 điểm
+- Vòng 1/16 và 1/8: 2 điểm
+- Tứ kết: 3 điểm
+- Bán kết: 4 điểm
+- Chung kết: 5 điểm
+
+Các trường hợp đoán sai tỷ số hoặc không dự đoán: 0 điểm.
 
 Toàn bộ dữ liệu chung nằm trong Google Sheet ở các tab:
 

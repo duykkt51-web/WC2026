@@ -21,10 +21,11 @@ const MEMBER_NAME_ALIASES = {
 };
 
 const DEFAULT_SETTINGS = {
-  exactPoints: 3,
-  outcomePoints: 1,
-  wrongPenalty: 0,
-  missedPenalty: 0,
+  groupExactPoints: 1,
+  roundOf32ExactPoints: 2,
+  quarterFinalExactPoints: 3,
+  semiFinalExactPoints: 4,
+  finalExactPoints: 5,
   matchFee: 30000,
   resultsUrl: '',
   reminderTime: '09:00',

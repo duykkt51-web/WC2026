@@ -116,10 +116,11 @@
           <section class="block">
             <h2>Luật điểm, chi phí và giải thưởng</h2>
             <div class="form-grid">
-              <label>Đúng tỉ số <input id="exactPoints" type="number" /></label>
-              <label>Đúng thắng/hòa/thua <input id="outcomePoints" type="number" /></label>
-              <label>Điểm sai <input id="wrongPenalty" type="number" /></label>
-              <label>Điểm bỏ lỡ <input id="missedPenalty" type="number" /></label>
+              <label>Vòng bảng đúng tỷ số <input id="groupExactPoints" type="number" /></label>
+              <label>Vòng 1/16 và 1/8 đúng tỷ số <input id="roundOf32ExactPoints" type="number" /></label>
+              <label>Tứ kết đúng tỷ số <input id="quarterFinalExactPoints" type="number" /></label>
+              <label>Bán kết đúng tỷ số <input id="semiFinalExactPoints" type="number" /></label>
+              <label>Chung kết đúng tỷ số <input id="finalExactPoints" type="number" /></label>
               <label>Phí tham gia/trận <input id="matchFee" type="number" step="1000" /></label>
               <label>URL kết quả JSON <input id="resultsUrl" type="url" placeholder="https://..." /></label>
               <label>Giờ nhắc hàng ngày <input id="reminderTime" type="time" /></label>
@@ -179,7 +180,6 @@
                   <th>Thành viên</th>
                   <th>Điểm</th>
                   <th>Đúng tỉ số</th>
-                  <th>Đúng kết quả</th>
                   <th>Sai</th>
                   <th>Bỏ lỡ</th>
                   <th>Phí tham gia</th>
