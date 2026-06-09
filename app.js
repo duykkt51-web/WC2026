@@ -105,9 +105,6 @@ const els = {
   leaderboardRows: document.querySelector("#leaderboardRows"),
   exportBtn: document.querySelector("#exportBtn"),
   exportSettingsBtn: document.querySelector("#exportSettingsBtn"),
-  personalTitle: document.querySelector("#personalTitle"),
-  personalFilter: document.querySelector("#personalFilter"),
-  personalList: document.querySelector("#personalList"),
   membersInput: document.querySelector("#membersInput"),
   saveMembersBtn: document.querySelector("#saveMembersBtn"),
   exactPoints: document.querySelector("#exactPoints"),
@@ -206,7 +203,6 @@ function bindEvents() {
   els.predictFilter.addEventListener("change", renderPredictions);
   els.refreshAwardsBtn.addEventListener("click", refreshSharedState);
   els.resultSearch.addEventListener("input", renderResults);
-  els.personalFilter.addEventListener("change", renderPersonal);
   els.notifyBtn.addEventListener("click", requestNotifications);
   els.refreshBtn.addEventListener("click", refreshSharedState);
   els.syncResultsBtn.addEventListener("click", syncResults);
@@ -226,7 +222,6 @@ function renderAll() {
   renderAwardPredictions();
   renderResults();
   renderLeaderboard();
-  renderPersonal();
   renderSettings();
   renderFinance();
 }
@@ -507,35 +502,6 @@ function renderFinance() {
     )
     .join("");
   els.prizeTotal.textContent = formatMoney(fixedPrizeTotal);
-}
-
-function renderPersonal() {
-  const member = state.currentMember;
-  const filter = els.personalFilter.value;
-  els.personalTitle.textContent = `Dự đoán cá nhân: ${member}`;
-  let rows = matches.map((match) => ({ match, score: scorePrediction(member, match) }));
-  if (filter === "win") rows = rows.filter((row) => row.score.points > 0);
-  if (filter === "wrong") rows = rows.filter((row) => row.score.status === "wrong");
-  if (filter === "missing") rows = rows.filter((row) => row.score.status === "missing");
-  renderList(
-    els.personalList,
-    rows,
-    ({ match, score }) => {
-      const prediction = getPrediction(member, match.id);
-      const result = state.results[match.id];
-      return `<div class="personal-row">
-        <div>
-          <strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong>
-          <div class="muted">${formatDate(match.kickoffVietnam)} · ${escapeHtml(match.venue)}</div>
-        </div>
-        <span>${prediction ? `${prediction.score1} - ${prediction.score2}` : "Chưa dự đoán"}</span>
-        <span class="pill ${score.points > 0 ? "good" : score.status === "wrong" ? "warn" : ""}">
-          ${result ? `${result.score1} - ${result.score2} · ${score.points} điểm` : "Chờ kết quả"}
-        </span>
-      </div>`;
-    },
-    "Chưa có dữ liệu phù hợp."
-  );
 }
 
 function renderSettings() {

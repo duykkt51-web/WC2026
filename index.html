@@ -21,15 +21,11 @@
     </header>
 
     <nav class="tabs" aria-label="Khu vực chức năng">
-      <button class="tab active" data-tab="dashboard" type="button">Tổng quan</button>
-      <button class="tab" data-tab="schedule" type="button">Lịch trận</button>
-      <button class="tab" data-tab="finance" type="button">Chi phí</button>
+      <button class="tab active" data-tab="dashboard" type="button">Hôm nay</button>
       <button class="tab" data-tab="predict" type="button">Dự đoán</button>
-      <button class="tab" data-tab="awardPredictions" type="button">Dự đoán giải</button>
-      <button class="tab" data-tab="results" type="button">Kết quả</button>
       <button class="tab" data-tab="leaderboard" type="button">BXH</button>
-      <button class="tab" data-tab="personal" type="button">Cá nhân</button>
-      <button class="tab" data-tab="settings" type="button">Cài đặt</button>
+      <button class="tab" data-tab="awardPredictions" type="button">Dự đoán giải</button>
+      <button class="tab" data-tab="admin" type="button">Quản trị</button>
     </nav>
 
     <main>
@@ -43,7 +39,7 @@
         </section>
       </section>
 
-      <section id="schedule" class="panel">
+      <section id="admin" class="panel">
         <div class="block">
           <div class="block-head">
             <h2>Lịch trận toàn bộ</h2>
@@ -51,9 +47,7 @@
           </div>
           <div id="scheduleList" class="day-list"></div>
         </div>
-      </section>
 
-      <section id="finance" class="panel">
         <section class="block finance-block">
           <h2>Chi phí và giải thưởng</h2>
           <div class="finance-grid">
@@ -91,87 +85,15 @@
             </div>
           </div>
         </section>
-      </section>
 
-      <section id="predict" class="panel">
-        <div class="toolbar">
-          <input id="predictSearch" type="search" placeholder="Tìm trận cần dự đoán" />
-          <select id="predictFilter">
-            <option value="all">Tất cả trận</option>
-            <option value="open">Còn mở</option>
-            <option value="missing">Chưa dự đoán</option>
-            <option value="scored">Đã có kết quả</option>
-          </select>
-        </div>
-        <div id="predictionList" class="match-list"></div>
-      </section>
-
-      <section id="awardPredictions" class="panel">
-        <div class="grid two">
-          <section class="block">
-            <h2>Dự đoán giải cá nhân</h2>
-            <div id="awardPredictionForm" class="award-form"></div>
-          </section>
-          <section class="block">
-            <div class="block-head">
-              <h2>Tổng hợp 15 thành viên</h2>
-              <button id="refreshAwardsBtn" class="secondary" type="button">Đồng bộ</button>
-            </div>
-            <div id="awardPredictionMatrix" class="table-wrap"></div>
-          </section>
-        </div>
-      </section>
-
-      <section id="results" class="panel">
-        <div class="toolbar">
-          <input id="resultSearch" type="search" placeholder="Tìm trận để nhập kết quả" />
-          <button id="syncResultsBtn" class="secondary" type="button">Cập nhật tự động</button>
-        </div>
-        <div id="resultList" class="match-list"></div>
-      </section>
-
-      <section id="leaderboard" class="panel">
-        <div class="block">
-          <div class="block-head">
-            <h2>Bảng xếp hạng</h2>
-            <button id="exportBtn" class="secondary" type="button">Xuất JSON</button>
+        <section class="block">
+          <div class="toolbar">
+            <input id="resultSearch" type="search" placeholder="Tìm trận để nhập kết quả" />
+            <button id="syncResultsBtn" class="secondary" type="button">Cập nhật tự động</button>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Thành viên</th>
-                  <th>Điểm</th>
-                  <th>Đúng tỉ số</th>
-                  <th>Đúng kết quả</th>
-                  <th>Sai</th>
-                  <th>Bỏ lỡ</th>
-                  <th>Phí tham gia</th>
-                </tr>
-              </thead>
-              <tbody id="leaderboardRows"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+          <div id="resultList" class="match-list"></div>
+        </section>
 
-      <section id="personal" class="panel">
-        <div class="block">
-          <div class="block-head">
-            <h2 id="personalTitle">Dự đoán cá nhân</h2>
-            <select id="personalFilter">
-              <option value="all">Tất cả</option>
-              <option value="win">Có điểm</option>
-              <option value="wrong">Sai</option>
-              <option value="missing">Bỏ lỡ</option>
-            </select>
-          </div>
-          <div id="personalList" class="personal-list"></div>
-        </div>
-      </section>
-
-      <section id="settings" class="panel">
         <div class="grid two">
           <section class="block">
             <h2>Google Sheets</h2>
@@ -213,6 +135,62 @@
           </section>
         </div>
       </section>
+
+      <section id="predict" class="panel">
+        <div class="toolbar">
+          <input id="predictSearch" type="search" placeholder="Tìm trận cần dự đoán" />
+          <select id="predictFilter">
+            <option value="all">Tất cả trận</option>
+            <option value="open">Còn mở</option>
+            <option value="missing">Chưa dự đoán</option>
+            <option value="scored">Đã có kết quả</option>
+          </select>
+        </div>
+        <div id="predictionList" class="match-list"></div>
+      </section>
+
+      <section id="awardPredictions" class="panel">
+        <div class="grid two">
+          <section class="block">
+            <h2>Dự đoán giải cá nhân</h2>
+            <div id="awardPredictionForm" class="award-form"></div>
+          </section>
+          <section class="block">
+            <div class="block-head">
+              <h2>Tổng hợp 15 thành viên</h2>
+              <button id="refreshAwardsBtn" class="secondary" type="button">Đồng bộ</button>
+            </div>
+            <div id="awardPredictionMatrix" class="table-wrap"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="leaderboard" class="panel">
+        <div class="block">
+          <div class="block-head">
+            <h2>Bảng xếp hạng</h2>
+            <button id="exportBtn" class="secondary" type="button">Xuất JSON</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Thành viên</th>
+                  <th>Điểm</th>
+                  <th>Đúng tỉ số</th>
+                  <th>Đúng kết quả</th>
+                  <th>Sai</th>
+                  <th>Bỏ lỡ</th>
+                  <th>Phí tham gia</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <script src="app.js"></script>
