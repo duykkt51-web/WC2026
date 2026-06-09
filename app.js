@@ -1,4 +1,6 @@
 const LOCAL_KEY = "wc2026-local-config-v2";
+const DEFAULT_API_URL =
+  "https://script.google.com/macros/s/AKfycbxCn1e_mwjgB6XUBtMcFlTqP2KxERsX8XWsd4mCsTy10YfUxZ2ScGt_6eai1D5A5fe5/exec";
 
 const defaultMembers = [
   "Nguyễn Đức Đông",
@@ -151,8 +153,11 @@ async function loadMatches() {
 
 function loadLocalConfig() {
   const saved = localStorage.getItem(LOCAL_KEY);
-  if (!saved) return { apiUrl: "", currentMember: defaultMembers[0], lastReminderDate: "" };
-  return { apiUrl: "", currentMember: defaultMembers[0], lastReminderDate: "", ...JSON.parse(saved) };
+  const fallback = { apiUrl: DEFAULT_API_URL, currentMember: defaultMembers[0], lastReminderDate: "" };
+  if (!saved) return fallback;
+  const config = { ...fallback, ...JSON.parse(saved) };
+  config.apiUrl = config.apiUrl || DEFAULT_API_URL;
+  return config;
 }
 
 function saveLocalConfig() {
