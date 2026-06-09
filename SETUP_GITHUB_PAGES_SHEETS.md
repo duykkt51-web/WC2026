@@ -66,6 +66,12 @@ Chỉ cộng điểm khi dự đoán đúng tỷ số.
 
 Các trường hợp đoán sai tỷ số hoặc không dự đoán: 0 điểm.
 
+Phí phải đóng:
+
+- Mỗi lượt dự đoán tạm tính 30.000 VNĐ.
+- Nếu thành viên đoán đúng tỷ số sau khi có kết quả, thành viên đó được miễn phí trận đó.
+- Vì vậy tổng thu thực tế có thể thấp hơn tổng tối đa `104 trận × 30.000 VNĐ × 15 người`.
+
 Toàn bộ dữ liệu chung nằm trong Google Sheet ở các tab:
 
 - `Members`

@@ -536,7 +536,7 @@ function renderFinance() {
   const fee = Number(state.settings.matchFee || defaultSettings.matchFee);
   const memberCount = state.members.length;
   const totalMatches = costRows.reduce((sum, row) => sum + row.matches, 0);
-  const entryPool = totalMatches * fee * memberCount;
+  const finance = financeSummary();
   const fixedPrizeTotal = fixedPrizeRows.reduce((sum, row) => sum + row.amount, 0);
 
   els.costRows.innerHTML = [
@@ -549,7 +549,8 @@ function renderFinance() {
         <td>${formatMoney(row.matches * fee * memberCount)}</td>
       </tr>`
     ),
-    `<tr class="total-row"><td>Tổng</td><td>${totalMatches}</td><td>${memberCount}</td><td></td><td>${formatMoney(entryPool)}</td></tr>`,
+    `<tr><td>Tổng tối đa</td><td>${totalMatches}</td><td>${memberCount}</td><td></td><td>${formatMoney(finance.maxEntryPool)}</td></tr>`,
+    `<tr class="total-row"><td>Tổng tạm thu hiện tại</td><td></td><td></td><td></td><td>${formatMoney(finance.entryPool)}</td></tr>`,
   ].join("");
 
   els.prizeRows.innerHTML = fixedPrizeRows
@@ -730,17 +731,27 @@ function exactPointsForMatch(match) {
 }
 
 function memberFee(member) {
-  const predicted = matches.filter((match) => getPrediction(member, match.id)).length;
-  return predicted * Number(state.settings.matchFee || defaultSettings.matchFee);
+  const fee = Number(state.settings.matchFee || defaultSettings.matchFee);
+  return matches.reduce((sum, match) => sum + memberMatchFee(member, match, fee), 0);
+}
+
+function memberMatchFee(member, match, fee = Number(state.settings.matchFee || defaultSettings.matchFee)) {
+  const prediction = getPrediction(member, match.id);
+  if (!prediction) return 0;
+  const result = state.results[match.id];
+  if (result && prediction.score1 === result.score1 && prediction.score2 === result.score2) return 0;
+  return fee;
 }
 
 function financeSummary() {
   const fee = Number(state.settings.matchFee || defaultSettings.matchFee);
   const totalMatches = costRows.reduce((sum, row) => sum + row.matches, 0);
-  const entryPool = totalMatches * fee * state.members.length;
+  const entryPool = state.members.reduce((sum, member) => sum + memberFee(member), 0);
+  const maxEntryPool = totalMatches * fee * state.members.length;
   const fixedPrize = fixedPrizeRows.reduce((sum, row) => sum + row.amount, 0);
   return {
     entryPool,
+    maxEntryPool,
     fixedPrize,
     totalPrize: fixedPrize,
   };
