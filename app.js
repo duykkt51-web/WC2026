@@ -1,4 +1,5 @@
 const LOCAL_KEY = "wc2026-local-config-v2";
+const ADMIN_EDIT_CODE = "2026";
 const DEFAULT_API_URL =
   "https://script.google.com/macros/s/AKfycbxCn1e_mwjgB6XUBtMcFlTqP2KxERsX8XWsd4mCsTy10YfUxZ2ScGt_6eai1D5A5fe5/exec";
 
@@ -122,6 +123,7 @@ const els = {
   resultsUrl: document.querySelector("#resultsUrl"),
   reminderTime: document.querySelector("#reminderTime"),
   apiUrl: document.querySelector("#apiUrl"),
+  adminEditCode: document.querySelector("#adminEditCode"),
   saveSettingsBtn: document.querySelector("#saveSettingsBtn"),
   resetBtn: document.querySelector("#resetBtn"),
   costRows: document.querySelector("#costRows"),
@@ -153,7 +155,7 @@ async function loadMatches() {
 
 function loadLocalConfig() {
   const saved = localStorage.getItem(LOCAL_KEY);
-  const fallback = { apiUrl: DEFAULT_API_URL, currentMember: defaultMembers[0], lastReminderDate: "" };
+  const fallback = { apiUrl: DEFAULT_API_URL, currentMember: defaultMembers[0], lastReminderDate: "", adminCode: "" };
   if (!saved) return fallback;
   const config = { ...fallback, ...JSON.parse(saved) };
   config.apiUrl = config.apiUrl || DEFAULT_API_URL;
@@ -592,6 +594,7 @@ function renderFinance() {
 function renderSettings() {
   els.membersInput.value = state.members.join("\n");
   els.apiUrl.value = localConfig.apiUrl || "";
+  if (els.adminEditCode) els.adminEditCode.value = localConfig.adminCode || "";
   Object.keys(defaultSettings).forEach((key) => {
     if (els[key]) els[key].value = state.settings[key] ?? "";
   });
@@ -606,7 +609,7 @@ function matchCard(match, mode) {
 
   if (mode === "predict") {
     const locked = Boolean(prediction);
-    const disabled = locked || (!isOpen(match) && !prediction) ? "disabled" : "";
+    const disabled = (locked && !isAdminMode()) || (!isOpen(match) && !prediction) ? "disabled" : "";
     body = `
       <div class="score-box">
         <input ${disabled} min="0" type="number" value="${prediction?.score1 ?? ""}" data-pred="${match.id}" data-side="score1" placeholder="0" />
@@ -658,7 +661,7 @@ document.addEventListener("click", (event) => {
 
 async function savePrediction(matchId) {
   if (!requireApi()) return;
-  if (getPrediction(state.currentMember, matchId)) {
+  if (getPrediction(state.currentMember, matchId) && !isAdminMode()) {
     alert("Trận này đã có dự đoán, không thể sửa.");
     await refreshSharedState();
     return;
@@ -668,7 +671,7 @@ async function savePrediction(matchId) {
   const score2 = numberFromInput(inputs.find((input) => input.dataset.side === "score2"));
   if (score1 === null || score2 === null) return alert("Nhập đủ tỉ số dự đoán.");
   try {
-    await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2 });
+    await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2, adminCode: localConfig.adminCode || "" });
     await refreshSharedState();
   } catch (error) {
     alert(error.message === "Prediction is locked" ? "Trận này đã có dự đoán, không thể sửa." : "Không lưu được dự đoán.");
@@ -916,6 +919,7 @@ async function saveSettings() {
   const nextApiUrl = els.apiUrl.value.trim();
   localConfig.apiUrl = nextApiUrl;
   localConfig.currentMember = state.currentMember;
+  localConfig.adminCode = els.adminEditCode?.value.trim() || "";
   saveLocalConfig();
 
   if (!nextApiUrl) {
@@ -1021,6 +1025,10 @@ function requireApi() {
   if (localConfig.apiUrl) return true;
   alert("Hãy vào Cài đặt và dán URL Web App Apps Script trước.");
   return false;
+}
+
+function isAdminMode() {
+  return localConfig.adminCode === ADMIN_EDIT_CODE;
 }
 
 function setApiStatus(text, type) {

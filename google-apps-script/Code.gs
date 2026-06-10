@@ -20,6 +20,8 @@ const MEMBER_NAME_ALIASES = {
   'Nguyễn Đức Đồng': 'Nguyễn Đức Đông',
 };
 
+const ADMIN_EDIT_CODE = '2026';
+
 const DEFAULT_SETTINGS = {
   groupExactPoints: 1,
   roundOf32ExactPoints: 2,
@@ -214,16 +216,20 @@ function savePrediction_(params) {
   if (!matchId || !member || !Number.isFinite(score1) || !Number.isFinite(score2)) {
     throw new Error('Invalid prediction');
   }
-  if (rowExists_('Predictions', 5, (row) => row[0] === matchId && row[1] === member)) {
+  const isAdmin = String(params.adminCode || '') === ADMIN_EDIT_CODE;
+  const exists = rowExists_('Predictions', 5, (row) => row[0] === matchId && row[1] === member);
+  if (exists && !isAdmin) {
     throw new Error('Prediction is locked');
   }
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Predictions').appendRow([
+  const values = [
     matchId,
     member,
     score1,
     score2,
     new Date().toISOString(),
-  ]);
+  ];
+  if (exists) upsertRow_('Predictions', 5, (row) => row[0] === matchId && row[1] === member, values);
+  else SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Predictions').appendRow(values);
 }
 
 function saveAwardPrediction_(params) {
