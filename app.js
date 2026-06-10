@@ -605,7 +605,8 @@ function matchCard(match, mode) {
   let body = "";
 
   if (mode === "predict") {
-    const disabled = !isOpen(match) && !prediction ? "disabled" : "";
+    const locked = Boolean(prediction);
+    const disabled = locked || (!isOpen(match) && !prediction) ? "disabled" : "";
     body = `
       <div class="score-box">
         <input ${disabled} min="0" type="number" value="${prediction?.score1 ?? ""}" data-pred="${match.id}" data-side="score1" placeholder="0" />
@@ -657,12 +658,22 @@ document.addEventListener("click", (event) => {
 
 async function savePrediction(matchId) {
   if (!requireApi()) return;
+  if (getPrediction(state.currentMember, matchId)) {
+    alert("Trận này đã có dự đoán, không thể sửa.");
+    await refreshSharedState();
+    return;
+  }
   const inputs = [...document.querySelectorAll(`[data-pred="${matchId}"]`)];
   const score1 = numberFromInput(inputs.find((input) => input.dataset.side === "score1"));
   const score2 = numberFromInput(inputs.find((input) => input.dataset.side === "score2"));
   if (score1 === null || score2 === null) return alert("Nhập đủ tỉ số dự đoán.");
-  await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2 });
-  await refreshSharedState();
+  try {
+    await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2 });
+    await refreshSharedState();
+  } catch (error) {
+    alert(error.message === "Prediction is locked" ? "Trận này đã có dự đoán, không thể sửa." : "Không lưu được dự đoán.");
+    await refreshSharedState();
+  }
 }
 
 async function saveAwardPrediction(awardKey) {

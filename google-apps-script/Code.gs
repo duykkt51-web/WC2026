@@ -214,7 +214,10 @@ function savePrediction_(params) {
   if (!matchId || !member || !Number.isFinite(score1) || !Number.isFinite(score2)) {
     throw new Error('Invalid prediction');
   }
-  upsertRow_('Predictions', 5, (row) => row[0] === matchId && row[1] === member, [
+  if (rowExists_('Predictions', 5, (row) => row[0] === matchId && row[1] === member)) {
+    throw new Error('Prediction is locked');
+  }
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Predictions').appendRow([
     matchId,
     member,
     score1,
@@ -316,6 +319,14 @@ function upsertRow_(sheetName, columnCount, predicate, values) {
     }
   }
   sheet.appendRow(values);
+}
+
+function rowExists_(sheetName, columnCount, predicate) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  const data = sheet.getRange(2, 1, lastRow - 1, columnCount).getValues();
+  return data.some(predicate);
 }
 
 function deleteRows_(sheetName, predicate) {
