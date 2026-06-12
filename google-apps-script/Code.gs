@@ -21,6 +21,7 @@ const MEMBER_NAME_ALIASES = {
 };
 
 const ADMIN_EDIT_CODE = '2026';
+const MATCHES_JSON_URL = 'https://duykkt51-web.github.io/WC2026/data/matches.json';
 
 const DEFAULT_SETTINGS = {
   groupExactPoints: 1,
@@ -73,6 +74,8 @@ function route_(params) {
       case 'clearResult':
         clearResult_(params.matchId);
         return getState_();
+      case 'syncResultsFromUrl':
+        return syncResultsFromUrl();
       case 'saveMembers':
         saveMembers_(JSON.parse(params.members || '[]'));
         return getState_();
@@ -259,6 +262,45 @@ function clearResult_(matchId) {
   deleteRows_('Results', (row) => row[0] === matchId);
 }
 
+function syncResultsFromUrl() {
+  ensureSheets_();
+  const settings = readSettings_();
+  const resultsUrl = String(settings.resultsUrl || '').trim();
+  if (!resultsUrl) throw new Error('Missing resultsUrl');
+
+  const response = UrlFetchApp.fetch(resultsUrl, { muteHttpExceptions: true });
+  const status = response.getResponseCode();
+  if (status < 200 || status >= 300) throw new Error(`Cannot fetch resultsUrl: HTTP ${status}`);
+
+  const payload = JSON.parse(response.getContentText());
+  const rows = Array.isArray(payload) ? payload : payload.results || payload.matches || [];
+  if (!Array.isArray(rows)) throw new Error('Invalid results payload');
+
+  const numberToId = readMatchNumberMap_();
+  let updated = 0;
+  rows.forEach((row) => {
+    const result = normalizeResultRow_(row, numberToId);
+    if (!result) return;
+    saveResult_(result);
+    updated += 1;
+  });
+
+  return { updated, checkedAt: new Date().toISOString(), state: getState_() };
+}
+
+function setupAutoResultSync() {
+  removeAutoResultSync();
+  ScriptApp.newTrigger('syncResultsFromUrl').timeBased().everyHours(1).create();
+  return 'Auto result sync installed: every 1 hour';
+}
+
+function removeAutoResultSync() {
+  ScriptApp.getProjectTriggers().forEach((trigger) => {
+    if (trigger.getHandlerFunction() === 'syncResultsFromUrl') ScriptApp.deleteTrigger(trigger);
+  });
+  return 'Auto result sync removed';
+}
+
 function saveMembers_(members) {
   const cleanMembers = members.map((name) => String(name).trim()).filter(Boolean);
   if (!cleanMembers.length) throw new Error('Members cannot be empty');
@@ -333,6 +375,37 @@ function rowExists_(sheetName, columnCount, predicate) {
   if (lastRow < 2) return false;
   const data = sheet.getRange(2, 1, lastRow - 1, columnCount).getValues();
   return data.some(predicate);
+}
+
+function normalizeResultRow_(row, numberToId) {
+  if (!row || typeof row !== 'object') return null;
+  const rawMatchId = firstPresent_(row.matchId, row.match_id);
+  const rawNumber = firstPresent_(row.number, row.matchNumber, row.match_no, row.match, row.id);
+  const matchId = rawMatchId
+    ? String(rawMatchId).trim()
+    : numberToId[String(Number(rawNumber))] || '';
+  const score1 = Number(firstPresent_(row.score1, row.homeScore, row.team1Score, row.home_goals, row.homeGoals));
+  const score2 = Number(firstPresent_(row.score2, row.awayScore, row.team2Score, row.away_goals, row.awayGoals));
+  if (!matchId || !Number.isFinite(score1) || !Number.isFinite(score2)) return null;
+  return { matchId, score1, score2 };
+}
+
+function readMatchNumberMap_() {
+  const response = UrlFetchApp.fetch(MATCHES_JSON_URL, { muteHttpExceptions: true });
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) return {};
+  const rows = JSON.parse(response.getContentText());
+  return rows.reduce((map, match) => {
+    if (match && match.number && match.id) map[String(Number(match.number))] = String(match.id);
+    return map;
+  }, {});
+}
+
+function firstPresent_() {
+  for (let index = 0; index < arguments.length; index += 1) {
+    const value = arguments[index];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return '';
 }
 
 function deleteRows_(sheetName, predicate) {

@@ -98,3 +98,31 @@ Trong bảng giải thưởng, app chỉ hiển thị các giải cố định:
 - Giải phong cách FIFA Fair Play Trophy: 1.000.000 VNĐ
 
 Tổng giải cố định: 5.000.000 VNĐ.
+
+## Tự động cập nhật kết quả
+
+App có thể tự cập nhật kết quả nếu tab `Quản trị` có `URL kết quả JSON`.
+
+JSON nên là một mảng hoặc object có trường `results`/`matches`. Mỗi dòng cần có một trong hai cách định danh trận:
+
+- `matchId`: ví dụ `M001`
+- hoặc `number`: ví dụ `1`, app sẽ tự map sang `M001` từ `data/matches.json`
+
+Ví dụ:
+
+```json
+[
+  { "number": 1, "score1": 2, "score2": 1 },
+  { "matchId": "M002", "score1": 0, "score2": 0 }
+]
+```
+
+Để chạy tự động:
+
+1. Copy lại `google-apps-script/Code.gs` lên Apps Script.
+2. Bấm `Save`.
+3. Deploy `New version`.
+4. Trong Apps Script, chọn hàm `setupAutoResultSync`.
+5. Bấm `Run` và cấp quyền.
+
+Sau khi bật, Apps Script sẽ tự chạy `syncResultsFromUrl` mỗi 1 giờ. Muốn tắt thì chạy hàm `removeAutoResultSync`.

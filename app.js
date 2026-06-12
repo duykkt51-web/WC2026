@@ -890,22 +890,9 @@ async function syncResults() {
   }
   if (!requireApi()) return;
   try {
-    const response = await fetch(state.settings.resultsUrl);
-    if (!response.ok) throw new Error("Cannot fetch results");
-    const rows = await response.json();
-    for (const row of rows) {
-      const match = matches.find((item) => item.number === Number(row.number) || item.id === row.id);
-      if (!match) continue;
-      if (Number.isInteger(Number(row.score1)) && Number.isInteger(Number(row.score2))) {
-        await apiCall("saveResult", {
-          matchId: match.id,
-          score1: Number(row.score1),
-          score2: Number(row.score2),
-        });
-      }
-    }
+    const result = await apiCall("syncResultsFromUrl");
     await refreshSharedState();
-    alert("Đã cập nhật kết quả và tính lại điểm.");
+    alert(`Đã cập nhật ${result.updated || 0} kết quả và tính lại điểm.`);
   } catch {
     alert("Không cập nhật được. Kiểm tra URL JSON.");
   }
