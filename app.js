@@ -555,8 +555,6 @@ function renderLeaderboard() {
         <td>${index + 1}</td>
         <td><strong>${escapeHtml(row.name)}</strong></td>
         <td>${row.points}</td>
-        <td>${row.exact}</td>
-        <td>${row.wrong}</td>
         <td>${row.missed}</td>
       </tr>`
     )
