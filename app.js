@@ -356,7 +356,7 @@ function renderDailyPredictionStatus() {
   const dayMatches = dailyStatusMatches();
   if (!dayMatches.length) {
     els.dailyStatusTitle.textContent = "Theo dõi dự đoán trong ngày";
-    els.todayPredictionStatus.innerHTML = `<p class="empty">Không có trận trong hôm nay hoặc 2 ngày tới.</p>`;
+    els.todayPredictionStatus.innerHTML = `<p class="empty">Không có trận trong hôm nay.</p>`;
     return;
   }
 
@@ -368,18 +368,23 @@ function renderDailyPredictionStatus() {
 function predictionStatusCard(match) {
   const predictedMembers = state.members.filter((member) => getPrediction(member, match.id));
   const missingMembers = state.members.filter((member) => !getPrediction(member, match.id));
+  const result = state.results[match.id];
+  const resultText = result ? `<span class="pill good">Kết quả ${result.score1} - ${result.score2}</span>` : "";
   return `<article class="status-card">
     <div class="status-head">
       <div>
         <strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong>
         <span>${formatDate(match.kickoffVietnam)} · ${escapeHtml(match.venue)}</span>
       </div>
-      <span class="pill ${missingMembers.length ? "warn" : "good"}">${predictedMembers.length}/${state.members.length} đã dự đoán</span>
+      <div class="status-pills">
+        ${resultText}
+        <span class="pill ${missingMembers.length ? "warn" : "good"}">${predictedMembers.length}/${state.members.length} đã dự đoán</span>
+      </div>
     </div>
     <div class="status-grid">
       <div>
         <h4>Đã dự đoán</h4>
-        <div class="member-tags">${predictedMemberTags(predictedMembers, match.id)}</div>
+        <div class="member-tags">${predictedMemberTags(predictedMembers, match)}</div>
       </div>
       <div>
         <h4>Chưa dự đoán</h4>
@@ -389,12 +394,14 @@ function predictionStatusCard(match) {
   </article>`;
 }
 
-function predictedMemberTags(members, matchId) {
+function predictedMemberTags(members, match) {
+  const result = state.results[match.id];
   return members.length
     ? members
         .map((member) => {
-          const prediction = getPrediction(member, matchId);
-          return `<span class="member-tag good">${escapeHtml(member)} <strong>${prediction.score1} - ${prediction.score2}</strong></span>`;
+          const prediction = getPrediction(member, match.id);
+          const exact = result && prediction.score1 === result.score1 && prediction.score2 === result.score2;
+          return `<span class="member-tag ${exact ? "exact" : "predicted"}">${escapeHtml(member)} <strong>${prediction.score1} - ${prediction.score2}</strong></span>`;
         })
         .join("")
     : `<span class="muted">Không có</span>`;
@@ -551,7 +558,6 @@ function renderLeaderboard() {
         <td>${row.exact}</td>
         <td>${row.wrong}</td>
         <td>${row.missed}</td>
-        <td>${formatMoney(row.money)}</td>
       </tr>`
     )
     .join("");
@@ -832,17 +838,11 @@ function nextTwoDayMatches() {
 }
 
 function dailyStatusMatches() {
-  const today = new Date().toISOString().slice(0, 10);
-  const todayList = matchesForDate(today);
-  if (todayList.length) return todayList;
-  const nextTwoDays = nextTwoDayMatches();
-  if (!nextTwoDays.length) return [];
-  return matchesForDate(dateKey(nextTwoDays[0].kickoffVietnam));
+  return todayMatches().slice(0, 3);
 }
 
 function todayMatches() {
-  const today = new Date().toISOString().slice(0, 10);
-  return matchesForDate(today);
+  return matchesForDate(localDateKey());
 }
 
 function matchesForDate(dayKey) {
@@ -863,6 +863,13 @@ function groupMatchesByDate(list) {
 
 function dateKey(value) {
   return value ? String(value).slice(0, 10) : "";
+}
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function isOpen(match) {

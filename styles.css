@@ -521,6 +521,13 @@ main {
   gap: 6px;
 }
 
+.status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .member-tag {
   border-radius: 999px;
   display: inline-flex;
@@ -533,6 +540,17 @@ main {
 .member-tag.good {
   background: #dff2e8;
   color: var(--good);
+}
+
+.member-tag.predicted {
+  background: #eef2f7;
+  color: var(--ink);
+}
+
+.member-tag.exact {
+  background: #dff2e8;
+  color: var(--good);
+  box-shadow: inset 0 0 0 1px rgba(24, 121, 78, 0.25);
 }
 
 .member-tag.warn {
