@@ -74,6 +74,57 @@ const fixedPrizeRows = [
   },
 ];
 
+const teamFlagCodes = {
+  algeria: "dz",
+  argentina: "ar",
+  australia: "au",
+  austria: "at",
+  belgium: "be",
+  "bosnia and herzegovina": "ba",
+  brazil: "br",
+  canada: "ca",
+  "cape verde": "cv",
+  colombia: "co",
+  croatia: "hr",
+  curacao: "cw",
+  "czech republic": "cz",
+  "dr congo": "cd",
+  ecuador: "ec",
+  egypt: "eg",
+  england: "gb-eng",
+  france: "fr",
+  germany: "de",
+  ghana: "gh",
+  haiti: "ht",
+  iran: "ir",
+  iraq: "iq",
+  "ivory coast": "ci",
+  japan: "jp",
+  jordan: "jo",
+  mexico: "mx",
+  morocco: "ma",
+  netherlands: "nl",
+  "new zealand": "nz",
+  norway: "no",
+  panama: "pa",
+  paraguay: "py",
+  portugal: "pt",
+  qatar: "qa",
+  "saudi arabia": "sa",
+  scotland: "gb-sct",
+  senegal: "sn",
+  "south africa": "za",
+  "south korea": "kr",
+  spain: "es",
+  sweden: "se",
+  switzerland: "ch",
+  tunisia: "tn",
+  turkey: "tr",
+  "united states": "us",
+  uruguay: "uy",
+  uzbekistan: "uz",
+};
+
 let matches = [];
 let state = {
   members: defaultMembers,
@@ -85,6 +136,7 @@ let state = {
   lastReminderDate: "",
 };
 let localConfig = loadLocalConfig();
+let toastTimer = null;
 
 const els = {
   seasonMeta: document.querySelector("#seasonMeta"),
@@ -129,6 +181,7 @@ const els = {
   costRows: document.querySelector("#costRows"),
   prizeRows: document.querySelector("#prizeRows"),
   prizeTotal: document.querySelector("#prizeTotal"),
+  toast: document.querySelector("#toast"),
 };
 
 init();
@@ -352,8 +405,8 @@ function scheduleRow(match) {
   return `<tr>
     <td>${match.number}</td>
     <td>${formatTime(match.kickoffVietnam)}</td>
-    <td><strong>${escapeHtml(match.team1)}</strong></td>
-    <td><strong>${escapeHtml(match.team2)}</strong></td>
+    <td><strong>${teamName(match.team1)}</strong></td>
+    <td><strong>${teamName(match.team2)}</strong></td>
     <td>${escapeHtml(match.venue)}</td>
     <td>${predictedCount}/${state.members.length}</td>
     <td>${result ? `${result.score1} - ${result.score2}` : "Chưa có"}</td>
@@ -381,7 +434,7 @@ function predictionStatusCard(match) {
   return `<article class="status-card">
     <div class="status-head">
       <div>
-        <strong>#${match.number} ${escapeHtml(match.team1)} - ${escapeHtml(match.team2)}</strong>
+        <strong>#${match.number} ${teamName(match.team1)} - ${teamName(match.team2)}</strong>
         <span>${formatDate(match.kickoffVietnam)} · ${escapeHtml(match.venue)}</span>
       </div>
       <div class="status-pills">
@@ -483,9 +536,9 @@ function predictionOverviewRow(match) {
     <td>${formatShortDate(match.kickoffVietnam)}</td>
     <td>${formatTime(match.kickoffVietnam)}</td>
     <td>${escapeHtml(match.stage)}</td>
-    <td><strong>${escapeHtml(match.team1)}</strong></td>
+    <td><strong>${teamName(match.team1)}</strong></td>
     <td class="score-cell">${result ? `${result.score1} - ${result.score2}` : ""}</td>
-    <td><strong>${escapeHtml(match.team2)}</strong></td>
+    <td><strong>${teamName(match.team2)}</strong></td>
     ${state.members.map((member) => predictionCell(member, match)).join("")}
   </tr>`;
 }
@@ -653,9 +706,9 @@ function matchCard(match, mode) {
       <span>${escapeHtml(match.venue)}</span>
     </div>
     <div class="teams">
-      <span>${escapeHtml(match.team1)}</span>
+      <span>${teamName(match.team1)}</span>
       <strong>${result ? `${result.score1} - ${result.score2}` : "vs"}</strong>
-      <span>${escapeHtml(match.team2)}</span>
+      <span>${teamName(match.team2)}</span>
     </div>
     <div class="card-body">${body}</div>
   </article>`;
@@ -692,6 +745,7 @@ async function savePrediction(matchId) {
       savedAt: new Date().toISOString(),
     };
     renderPredictionSaveUpdate();
+    showToast("Đã lưu dự đoán thành công.");
   } catch (error) {
     alert(error.message === "Prediction is locked" ? "Trận này đã có dự đoán, không thể sửa." : "Không lưu được dự đoán.");
     await refreshSharedState();
@@ -711,6 +765,7 @@ async function saveAwardPrediction(awardKey) {
     prediction,
   });
   await refreshSharedState();
+  showToast("Đã lưu dự đoán giải.");
 }
 
 async function saveResult(matchId) {
@@ -721,12 +776,14 @@ async function saveResult(matchId) {
   if (score1 === null || score2 === null) return alert("Nhập đủ tỉ số kết quả.");
   await apiCall("saveResult", { matchId, score1, score2 });
   await refreshSharedState();
+  showToast("Đã lưu kết quả.");
 }
 
 async function clearResult(matchId) {
   if (!requireApi()) return;
   await apiCall("clearResult", { matchId });
   await refreshSharedState();
+  showToast("Đã xóa kết quả.", "warn");
 }
 
 function calculateLeaderboard() {
@@ -1046,6 +1103,16 @@ function setApiStatus(text, type) {
   els.apiStatus.className = `pill ${type || ""}`.trim();
 }
 
+function showToast(message, type = "good") {
+  if (!els.toast) return;
+  window.clearTimeout(toastTimer);
+  els.toast.textContent = message;
+  els.toast.className = `toast ${type} show`;
+  toastTimer = window.setTimeout(() => {
+    els.toast.className = "toast";
+  }, 2200);
+}
+
 function renderList(container, items, renderer, emptyText = "Không có dữ liệu.") {
   container.innerHTML = items.length ? items.map(renderer).join("") : `<p class="empty">${emptyText}</p>`;
 }
@@ -1063,6 +1130,17 @@ function numberFromInput(input) {
 
 function matchText(match) {
   return norm(`${match.number} ${match.team1} ${match.team2} ${match.venue} ${match.stage}`);
+}
+
+function teamName(team) {
+  const flag = teamFlag(team);
+  return `<span class="team-name">${flag}<span>${escapeHtml(team)}</span></span>`;
+}
+
+function teamFlag(team) {
+  const code = teamFlagCodes[norm(team)];
+  if (!code) return "";
+  return `<img class="team-flag" src="https://flagcdn.com/w20/${code}.png" srcset="https://flagcdn.com/w40/${code}.png 2x" alt="" loading="lazy" />`;
 }
 
 function norm(value) {

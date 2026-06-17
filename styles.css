@@ -1,16 +1,16 @@
 :root {
-  --bg: #f4f6f8;
+  --bg: #fff8e6;
   --surface: #ffffff;
-  --surface-2: #eef3f7;
+  --surface-2: #fff1c9;
   --text: #16202a;
   --muted: #5c6975;
-  --line: #d9e1e8;
+  --line: #eadfbe;
   --primary: #166a5b;
   --primary-2: #0f4f44;
   --accent: #c63d32;
   --warn: #b97810;
   --good: #18794e;
-  --shadow: 0 12px 28px rgba(23, 33, 43, 0.08);
+  --shadow: 0 12px 28px rgba(90, 66, 22, 0.08);
 }
 
 * {
@@ -19,7 +19,9 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(255, 230, 153, 0.28), transparent 34rem),
+    var(--bg);
   color: var(--text);
   font-family: "Segoe UI", Arial, sans-serif;
 }
@@ -76,13 +78,32 @@ textarea {
 }
 
 .topbar {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 18px clamp(16px, 3vw, 36px);
-  background: #102a2e;
+  background:
+    linear-gradient(90deg, rgba(12, 39, 42, 0.94), rgba(14, 82, 70, 0.84)),
+    url("https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=1600&q=70");
+  background-position: center;
+  background-size: cover;
   color: #fff;
+}
+
+.topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.topbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.22));
+  pointer-events: none;
 }
 
 .topbar h1 {
@@ -111,8 +132,9 @@ textarea {
   gap: 8px;
   overflow-x: auto;
   padding: 10px clamp(16px, 3vw, 36px);
-  background: var(--surface);
+  background: rgba(255, 252, 242, 0.92);
   border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
 }
 
 .tab {
@@ -275,8 +297,24 @@ main {
   font-weight: 800;
 }
 
-.teams span:first-child {
+.teams > span:first-child {
   text-align: right;
+}
+
+.team-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.team-flag {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(22, 32, 42, 0.12);
+  object-fit: cover;
 }
 
 .score-box {
@@ -389,8 +427,10 @@ main {
 }
 
 .prediction-cell.exact {
-  background: #93c47d;
+  background: linear-gradient(180deg, #ccf4dc, #96d9b0);
+  color: #0b5132;
   font-weight: 800;
+  box-shadow: inset 0 0 0 2px rgba(24, 121, 78, 0.35);
 }
 
 .prediction-cell.missing {
@@ -495,11 +535,11 @@ main {
 }
 
 .status-head strong,
-.status-head span {
+.status-head > div > span {
   display: block;
 }
 
-.status-head span:not(.pill) {
+.status-head > div > span:not(.pill) {
   color: var(--muted);
   margin-top: 4px;
 }
@@ -548,9 +588,12 @@ main {
 }
 
 .member-tag.exact {
-  background: #dff2e8;
+  background: linear-gradient(180deg, #e7f9ed, #bdebcf);
   color: var(--good);
-  box-shadow: inset 0 0 0 1px rgba(24, 121, 78, 0.25);
+  box-shadow:
+    inset 0 0 0 1px rgba(24, 121, 78, 0.3),
+    0 6px 14px rgba(24, 121, 78, 0.16);
+  font-weight: 800;
 }
 
 .member-tag.warn {
@@ -575,6 +618,10 @@ th {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
+}
+
+tbody tr:hover {
+  background: #fff9e8;
 }
 
 tfoot td,
@@ -629,6 +676,37 @@ tfoot td:last-child,
   padding: 10px 0;
 }
 
+.toast {
+  position: fixed;
+  right: clamp(16px, 3vw, 32px);
+  bottom: 22px;
+  z-index: 50;
+  max-width: min(360px, calc(100vw - 32px));
+  transform: translateY(18px);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 8px;
+  background: #123c34;
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(22, 32, 42, 0.22);
+  font-weight: 800;
+  padding: 12px 14px;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.good {
+  background: #18794e;
+}
+
+.toast.warn {
+  background: #9a5f08;
+}
+
 @media (max-width: 900px) {
   .topbar,
   .top-actions,
@@ -659,7 +737,7 @@ tfoot td:last-child,
     text-align: left;
   }
 
-  .teams span:first-child {
+  .teams > span:first-child {
     text-align: left;
   }
 
