@@ -64,7 +64,7 @@ function route_(params) {
         return getState_();
       case 'savePrediction':
         savePrediction_(params);
-        return getState_();
+        return { saved: true };
       case 'saveAwardPrediction':
         saveAwardPrediction_(params);
         return getState_();

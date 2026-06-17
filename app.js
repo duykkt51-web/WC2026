@@ -241,6 +241,14 @@ function renderAll() {
   renderFinance();
 }
 
+function renderPredictionSaveUpdate() {
+  renderDashboard();
+  renderPredictions();
+  renderPredictionOverview();
+  renderLeaderboard();
+  renderFinance();
+}
+
 function renderHeader() {
   const scored = Object.keys(state.results).length;
   const source = localConfig.apiUrl ? "Google Sheets" : "dữ liệu mẫu cục bộ";
@@ -677,7 +685,13 @@ async function savePrediction(matchId) {
   if (score1 === null || score2 === null) return alert("Nhập đủ tỉ số dự đoán.");
   try {
     await apiCall("savePrediction", { matchId, member: state.currentMember, score1, score2, adminCode: localConfig.adminCode || "" });
-    await refreshSharedState();
+    state.predictions[matchId] ||= {};
+    state.predictions[matchId][state.currentMember] = {
+      score1,
+      score2,
+      savedAt: new Date().toISOString(),
+    };
+    renderPredictionSaveUpdate();
   } catch (error) {
     alert(error.message === "Prediction is locked" ? "Trận này đã có dự đoán, không thể sửa." : "Không lưu được dự đoán.");
     await refreshSharedState();
