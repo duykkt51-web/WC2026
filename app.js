@@ -614,7 +614,7 @@ function renderLeaderboard() {
       (row, index) => `
       <tr>
         <td>${index + 1}</td>
-        <td><strong>${escapeHtml(row.name)}</strong></td>
+        <td><strong class="${index === 0 ? "leader-name top-leader" : "leader-name"}">${index === 0 ? '<span class="laurel" aria-label="Top 1">🏆</span>' : ""}${escapeHtml(row.name)}</strong></td>
         <td>${row.points}</td>
         <td>${row.missed}</td>
       </tr>`

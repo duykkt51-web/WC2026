@@ -634,6 +634,30 @@ tfoot td:last-child,
   color: var(--accent);
 }
 
+.leader-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-leader {
+  color: #7a4a00;
+}
+
+.laurel {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3bb, #e7bd45);
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 74, 0, 0.22),
+    0 6px 12px rgba(122, 74, 0, 0.16);
+  font-size: 15px;
+  line-height: 1;
+}
+
 .personal-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
