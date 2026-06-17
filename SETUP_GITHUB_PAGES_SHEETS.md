@@ -51,7 +51,7 @@ Các file cần có trên GitHub Pages:
 - Tab `Dự đoán`: nhập tỉ số từng trận.
 - Tab `Kết quả`: người quản lý nhập kết quả thật.
 - Tab `BXH`: tự tính điểm và tiền.
-- Tab `Tổng quan`: xem bảng chi phí 104 trận, phí 30.000/trận/người và hệ thống giải thưởng.
+- Tab `Tổng quan`: xem bảng chi phí 104 trận, phí 30/trận/người và hệ thống giải thưởng.
 - Tab `Quản trị`: sửa danh sách thành viên, luật điểm, phí tham gia/trận, nhập kết quả và xem chi phí.
 
 ## 6. Luật điểm
@@ -68,10 +68,10 @@ Các trường hợp đoán sai tỷ số hoặc không dự đoán: 0 điểm.
 
 Phí phải đóng:
 
-- Mỗi lượt dự đoán tạm tính 30.000 VNĐ.
+- Mỗi lượt dự đoán tạm tính 30 VNĐ.
 - Nếu thành viên đoán đúng tỷ số sau khi có kết quả, thành viên đó được miễn phí trận đó.
-- Nếu trận đã có kết quả mà thành viên không dự đoán, thành viên đó bị tính thua và phải đóng 30.000 VNĐ.
-- Vì vậy tổng thu thực tế có thể thấp hơn tổng tối đa `104 trận × 30.000 VNĐ × 15 người`.
+- Nếu trận đã có kết quả mà thành viên không dự đoán, thành viên đó bị tính thua và phải đóng 30 VNĐ.
+- Vì vậy tổng thu thực tế có thể thấp hơn tổng tối đa `104 trận × 30 VNĐ × 15 người`.
 
 Toàn bộ dữ liệu chung nằm trong Google Sheet ở các tab:
 
@@ -87,17 +87,17 @@ Khi thêm dự đoán giải thưởng, chạy lại hàm `setup()` hoặc mở 
 
 Với danh sách mặc định 15 người, phí dự đoán toàn bộ 104 trận là:
 
-`104 trận × 30.000 VNĐ × 15 người = 46.800.000 VNĐ`.
+`104 trận × 30 VNĐ × 15 người = 46.800 VNĐ`.
 
 Trong bảng giải thưởng, app chỉ hiển thị các giải cố định:
 
-- Nhà vô địch World Cup 2026: 1.000.000 VNĐ
-- Quả bóng Vàng: 1.000.000 VNĐ
-- Chiếc giày Vàng: 1.000.000 VNĐ
-- Găng tay Vàng: 1.000.000 VNĐ
-- Giải phong cách FIFA Fair Play Trophy: 1.000.000 VNĐ
+- Nhà vô địch World Cup 2026: 1.000 VNĐ
+- Quả bóng Vàng: 1.000 VNĐ
+- Chiếc giày Vàng: 1.000 VNĐ
+- Găng tay Vàng: 1.000 VNĐ
+- Giải phong cách FIFA Fair Play Trophy: 1.000 VNĐ
 
-Tổng giải cố định: 5.000.000 VNĐ.
+Tổng giải cố định: 5.000 VNĐ.
 
 ## Tự động cập nhật kết quả
 

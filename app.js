@@ -47,29 +47,29 @@ const costRows = [
 ];
 
 const fixedPrizeRows = [
-  { key: "champion", label: "Nhà Vô địch World Cup 2026", valueLabel: "Tổng Giá trị 1.000.000 VNĐ", amount: 1000000 },
+  { key: "champion", label: "Nhà Vô địch World Cup 2026", valueLabel: "Tổng Giá trị 1.000 VNĐ", amount: 1000000 },
   {
     key: "goldenBall",
     label: "Quả bóng Vàng (Golden Ball): Cầu thủ xuất sắc nhất giải đấu",
-    valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
+    valueLabel: "Tổng Giá trị 1.000 VNĐ",
     amount: 1000000,
   },
   {
     key: "goldenBoot",
     label: "Chiếc giày Vàng (Golden Boot): Vua phá lưới",
-    valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
+    valueLabel: "Tổng Giá trị 1.000 VNĐ",
     amount: 1000000,
   },
   {
     key: "goldenGlove",
     label: "Găng tay Vàng (Golden Glove): Thủ môn xuất sắc nhất",
-    valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
+    valueLabel: "Tổng Giá trị 1.000 VNĐ",
     amount: 1000000,
   },
   {
     key: "fairPlay",
     label: "Giải phong cách (FIFA Fair Play Trophy): Đội bóng có lối chơi và hành vi đẹp nhất giải",
-    valueLabel: "Tổng Giá trị 1.000.000 VNĐ",
+    valueLabel: "Tổng Giá trị 1.000 VNĐ",
     amount: 1000000,
   },
 ];
@@ -600,7 +600,8 @@ function renderSettings() {
   els.apiUrl.value = localConfig.apiUrl || "";
   if (els.adminEditCode) els.adminEditCode.value = localConfig.adminCode || "";
   Object.keys(defaultSettings).forEach((key) => {
-    if (els[key]) els[key].value = state.settings[key] ?? "";
+    if (!els[key]) return;
+    els[key].value = key === "matchFee" ? Number(state.settings[key] || 0) / 1000 : state.settings[key] ?? "";
   });
 }
 
@@ -923,8 +924,11 @@ async function saveSettings() {
 
   const settings = {};
   Object.keys(defaultSettings).forEach((key) => {
-    settings[key] =
-      els[key]?.type === "number" ? Number(els[key].value || 0) : els[key]?.value ?? defaultSettings[key];
+    if (key === "matchFee") {
+      settings[key] = Number(els[key]?.value || 0) * 1000;
+      return;
+    }
+    settings[key] = els[key]?.type === "number" ? Number(els[key].value || 0) : els[key]?.value ?? defaultSettings[key];
   });
   await apiCall("saveSettings", { settings: JSON.stringify(settings) });
   await refreshSharedState();
@@ -1087,7 +1091,7 @@ function formatMoney(value) {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(value || 0);
+  }).format((value || 0) / 1000);
 }
 
 function escapeHtml(value) {
