@@ -392,6 +392,12 @@ main {
   border: 1px solid #202020;
 }
 
+.prediction-overview-wrap {
+  max-height: calc(100vh - 230px);
+  overflow: auto;
+  position: relative;
+}
+
 .prediction-overview-table th,
 .prediction-overview-table td {
   border: 1px solid #202020;
@@ -405,6 +411,19 @@ main {
   background: #ec7b2d;
   color: #080808;
   font-weight: 800;
+}
+
+.prediction-overview-table thead th {
+  position: sticky;
+  z-index: 4;
+}
+
+.prediction-overview-table thead tr:first-child th {
+  top: 0;
+}
+
+.prediction-overview-table thead tr:nth-child(2) th {
+  top: 34px;
 }
 
 .prediction-overview-table .group-head {
