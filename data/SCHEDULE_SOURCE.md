@@ -7,6 +7,11 @@ Source used for the generated schedule:
 - https://www.thestatsapi.com/world-cup/data
 - https://www.thestatsapi.com/world-cup/data/fixtures.json
 
+Round of 32 teams updated on 2026-06-28 from:
+
+- https://indianexpress.com/article/sports/football/fifa-world-cup-2026-final-round-of-32-schedule-qualified-teams-10760874/
+- https://www.moneycontrol.com/sports/football/fifa-world-cup-2026/fifa-world-cup-2026-round-of-32-qualified-teams-complete-fixtures-match-timings-and-dates-in-ist-article-13960356.html
+
 Reference checks:
 
 - FIFA confirms the 2026 FIFA World Cup has 104 matches.
