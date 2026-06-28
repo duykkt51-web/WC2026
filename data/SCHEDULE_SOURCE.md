@@ -4,7 +4,8 @@
 
 Source used for the generated schedule:
 
-- https://worldcuply.com/schedule.html
+- https://www.thestatsapi.com/world-cup/data
+- https://www.thestatsapi.com/world-cup/data/fixtures.json
 
 Reference checks:
 
@@ -17,4 +18,4 @@ Time fields:
 - `kickoffUtc`: kickoff time in UTC.
 - `kickoffVietnam`: kickoff time converted to Vietnam time, UTC+7.
 
-Knockout matches use bracket placeholders such as `Group A winners` or `Winner Match 101` until the tournament determines the real teams.
+Knockout matches use bracket placeholders such as `Group A Winners` or `Winner Match 101` until the tournament determines the real teams.
