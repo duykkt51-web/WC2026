@@ -2,7 +2,7 @@ const LOCAL_KEY = "wc2026-local-config-v2";
 const ADMIN_EDIT_CODE = "2026";
 const DEFAULT_API_URL =
   "https://script.google.com/macros/s/AKfycbxCn1e_mwjgB6XUBtMcFlTqP2KxERsX8XWsd4mCsTy10YfUxZ2ScGt_6eai1D5A5fe5/exec";
-const MATCH_DATA_VERSION = "2026-07-03-r16-v2";
+const MATCH_DATA_VERSION = "2026-07-06-r16-v3";
 
 const defaultMembers = [
   "Nguyễn Đức Đông",
